@@ -6,7 +6,7 @@ Este projeto visa estruturar um banco de dados relacional (PostgreSQL) para supo
 
 # Diagrama Entidade-Relacionamento (DER)
 
-![alt text](db_der_hydroguard.svg)
+![alt text](mer.png)
 
 ---
 
