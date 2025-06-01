@@ -1,0 +1,101 @@
+erDiagram
+
+    river {
+        UUID id_river PK
+        VARCHAR river_name
+        TEXT description
+    }
+
+    river_segment {
+        UUID id_segment PK
+        UUID id_river FK
+        VARCHAR segment_name
+        TEXT location_description
+        GEOMETRY geographic_coordinates
+        NUMERIC critical_threshold_level
+    }
+
+    station_type {
+        UUID id_station_type PK
+        VARCHAR name
+        TEXT description
+    }
+
+    monitoring_station {
+        UUID id_station PK
+        UUID id_segment FK
+        UUID id_station_type FK
+        VARCHAR station_name
+        GEOMETRY geographic_location
+        TIMESTAMP installation_date
+        VARCHAR status
+    }
+
+    sensor_type {
+        UUID id_sensor_type PK
+        VARCHAR name
+        VARCHAR unit_of_measure
+        TEXT description
+    }
+
+    sensor {
+        UUID id_sensor PK
+        UUID id_station FK
+        UUID id_sensor_type FK
+        VARCHAR sensor_identifier
+        VARCHAR model
+        DATE calibration_date
+        VARCHAR status
+    }
+
+    sensor_measurement {
+        UUID id_measurement PK
+        UUID id_sensor FK
+        NUMERIC measurement_value
+        TIMESTAMP timestamp
+        VARCHAR data_source
+        VARCHAR quality_flag
+    }
+
+    ml_model {
+        UUID id_model PK
+        VARCHAR model_name
+        VARCHAR model_type
+        TIMESTAMP training_date
+        JSONB performance_metrics
+        VARCHAR model_path
+        JSONB input_features_description
+        JSONB output_target_description
+        BOOLEAN is_active
+    }
+
+    flood_prediction {
+        UUID id_prediction PK
+        UUID id_model FK
+        UUID id_station FK
+        TIMESTAMP prediction_timestamp
+        NUMERIC predicted_level
+        VARCHAR predicted_risk_level
+        INTEGER forecast_horizon_minutes
+        NUMERIC prediction_confidence
+    }
+
+    alert {
+        UUID id_alert PK
+        UUID id_prediction FK
+        TIMESTAMP alert_timestamp
+        VARCHAR alert_type
+        TEXT message
+        VARCHAR severity
+        VARCHAR status
+    }
+
+    river ||--o{ river_segment : "possui"
+    river_segment ||--o{ monitoring_station : "possui"
+    station_type ||--o{ monitoring_station : "categoriza"
+    monitoring_station ||--o{ sensor : "possui"
+    sensor_type ||--o{ sensor : "define"
+    sensor ||--o{ sensor_measurement : "realiza"
+    ml_model ||--o{ flood_prediction : "gera"
+    monitoring_station ||--o{ flood_prediction : "tem"
+    flood_prediction ||--o{ alert : "dispara"
