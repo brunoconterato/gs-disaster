@@ -13,12 +13,16 @@ Para o nosso modelo de ML, precisamos focar em:
 	* Dados série histórica das estações (Sistema Hidroweb): https://www.snirh.gov.br/hidroweb/serieshistoricas
 	* Dados abertos (Genérico): https://dadosabertos.ana.gov.br
 	* Dataset Vulnerabilidade a inundações (de onde vamos escolher um rio): https://dadosabertos.ana.gov.br/datasets/62a3924c1da34f73bf5b7132677213ea_0/explore
-  	* Escolha: Rio Capibaribe (PE)
-       Rio Capibaribe (Trecho Alto) – Recife (PE)
-      📌 Características: O trecho alto do Capibaribe, antes da Região Metropolitana, não possui grandes barragens.
-      ⚠️ Problema: Enchentes frequentes nos bairros de Recife, como Santo Amaro, Boa Vista e Afogados.
-      🔍 Observação: No entanto, há pequenas contenções em afluentes, então é importante verificar quais trechos são totalmente livres de controle.
+  	* Escolha: Rio Meia Ponte (Go)
+      📌 Características: Não possui grandes barragens.
+      ⚠️ Problema: Enchentes frequentes na reguiã metropolitana de Goiânia relacionaas as cheias.
+      🔍 Observação: Há pequenas contenções para captação de água, mas não alteram considerávelmente os níveis do rio.
 
+Fontes ignoradas:
+
+As seguintes fontes foram ignoradas por não possuírem dados em tempo real ou por serem de difícil acesso:
+
+💧 *1. Níveis de Rios e Vazões:* 
 *   *Internacional:* *WMO (WHOS)* (Organização Meteorológica Mundial)
     *   Agrega dados hidrológicos globais, incluindo a Bacia do Prata.
     *   Acesso via APIs (WaterML).
