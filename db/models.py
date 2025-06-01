@@ -24,6 +24,9 @@ class River(Base):
 
     river_segments = relationship("RiverSegment", back_populates="river")
 
+    def __repr__(self):
+        return f"<River(id_river={self.id_river}, river_name='{self.river_name}')>"
+
 # River Segment
 class RiverSegment(Base):
     __tablename__ = "river_segment"
@@ -37,6 +40,9 @@ class RiverSegment(Base):
     river = relationship("River", back_populates="river_segments")
     monitoring_stations = relationship("MonitoringStation", back_populates="river_segment")
 
+    def __repr__(self):
+        return f"<RiverSegment(id_segment={self.id_segment}, segment_name='{self.segment_name}')>"
+
 # Station Type
 class StationType(Base):
     __tablename__ = "station_type"
@@ -45,6 +51,9 @@ class StationType(Base):
     description = Column(Text)
 
     monitoring_stations = relationship("MonitoringStation", back_populates="station_type")
+
+    def __repr__(self):
+        return f"<StationType(id_station_type={self.id_station_type}, name='{self.name}')>"
 
 # Monitoring Station
 class MonitoringStation(Base):
@@ -62,6 +71,9 @@ class MonitoringStation(Base):
     sensors = relationship("Sensor", back_populates="monitoring_station")
     flood_predictions = relationship("FloodPrediction", back_populates="monitoring_station")
 
+    def __repr__(self):
+        return f"<MonitoringStation(id_station={self.id_station}, station_name='{self.station_name}')>"
+
 # Sensor Type
 class SensorType(Base):
     __tablename__ = "sensor_type"
@@ -71,6 +83,9 @@ class SensorType(Base):
     description = Column(Text)
 
     sensors = relationship("Sensor", back_populates="sensor_type")
+
+    def __repr__(self):
+        return f"<SensorType(id_sensor_type={self.id_sensor_type}, name='{self.name}')>"
 
 # Sensor
 class Sensor(Base):
@@ -87,6 +102,9 @@ class Sensor(Base):
     sensor_type = relationship("SensorType", back_populates="sensors")
     sensor_measurements = relationship("SensorMeasurement", back_populates="sensor")
 
+    def __repr__(self):
+        return f"<Sensor(id_sensor={self.id_sensor}, identifier='{self.sensor_identifier}')>"
+
 # Sensor Measurement
 class SensorMeasurement(Base):
     __tablename__ = "sensor_measurement"
@@ -98,6 +116,9 @@ class SensorMeasurement(Base):
     quality_flag = Column(String)
 
     sensor = relationship("Sensor", back_populates="sensor_measurements")
+
+    def __repr__(self):
+        return f"<SensorMeasurement(id_measurement={self.id_measurement}, timestamp={self.timestamp})>"
 
 # ML Model
 class MLModel(Base):
@@ -113,6 +134,9 @@ class MLModel(Base):
     is_active = Column(Boolean, nullable=False, default=True)
 
     flood_predictions = relationship("FloodPrediction", back_populates="ml_model")
+
+    def __repr__(self):
+        return f"<MLModel(id_model={self.id_model}, model_name='{self.model_name}')>"
 
 # Flood Prediction
 class FloodPrediction(Base):
@@ -130,6 +154,9 @@ class FloodPrediction(Base):
     monitoring_station = relationship("MonitoringStation", back_populates="flood_predictions")
     alerts = relationship("Alert", back_populates="flood_prediction")
 
+    def __repr__(self):
+        return f"<FloodPrediction(id_prediction={self.id_prediction}, timestamp={self.prediction_timestamp})>"
+
 # Alert
 class Alert(Base):
     __tablename__ = "alert"
@@ -139,6 +166,13 @@ class Alert(Base):
     alert_type = Column(String, nullable=False)
     message = Column(Text, nullable=False)
     severity = Column(String, nullable=False)
+    status = Column(String, nullable=False)
+
+    flood_prediction = relationship("FloodPrediction", back_populates="alerts")
+
+    def __repr__(self):
+        return f"<Alert(id_alert={self.id_alert}, severity='{self.severity}')>"
+
     status = Column(String, nullable=False)
 
     flood_prediction = relationship("FloodPrediction", back_populates="alerts")
