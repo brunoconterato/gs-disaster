@@ -200,3 +200,5 @@ cython_debug/
 
 # Temporary files, logs, and caches that are not needed in the repository.
 trash/
+all_code.py
+all.txt
