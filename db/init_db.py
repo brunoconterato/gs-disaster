@@ -1,17 +1,20 @@
-import sys
-import os
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../db')))
-
-# from sqlalchemy.orm import declarative_base
-from db.database_session import get_db  # Import get_db function
-from db.models import *
-from db.database_session import Base
+from database_session import get_db
+from models import *
+from database_session import Base
 from sqlalchemy import text
+
 
 # Database initialization
 def init_db():
     with get_db() as db:
-        Base.metadata.create_all(db.bind)       
+        with db.bind.connect() as conn:
+            conn.execute(
+                text("DROP VIEW IF EXISTS resampled_measurements_daily CASCADE;")
+            )
+            conn.commit()
+        Base.metadata.drop_all(db.bind)  # Drop all tables
+        Base.metadata.create_all(db.bind)  # Recreate all tables
+
 
 if __name__ == "__main__":
     init_db()

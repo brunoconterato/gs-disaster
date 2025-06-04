@@ -30,8 +30,8 @@ Desenvolver um MVP de um sistema que monitora o nível de rios e precipitação 
 ### **Fase 2: Dados**
 
 *   [ ] **2.1. Processamento e Ingestão de Dados Históricos**
-    *   [ ] 2.1.1. Carregar, inspecionar e limpar os dados do Rio Meia Ponte (nível e chuva) dos CSVs da ANA.
-    *   [ ] 2.1.2. Implementar script de ingestão de dados para popular as tabelas do banco de dados com os dados históricos.
+    *   [x] 2.1.1. Carregar, inspecionar e limpar os dados do Rio Meia Ponte (nível e chuva) dos CSVs da ANA.
+    *   [x] 2.1.2. Implementar script de ingestão de dados para popular as tabelas do banco de dados com os dados históricos.
     *   [ ] **Documentação:** Detalhar as fontes de dados usadas e o pré-processamento inicial (limpeza, tratamento de ausentes) na seção "Desenvolvimento" do PDF, incluindo a estratégia de ingestão no DB.
 
 *   [ ] **2.2. Análise Exploratória dos Dados (EDA)**
@@ -42,9 +42,9 @@ Desenvolver um MVP de um sistema que monitora o nível de rios e precipitação 
 
 *   [ ] **2.3. Engenharia de Features para ML**
     *   [ ] 2.3.1. Adaptar script de engenharia de features para ler os dados necessários diretamente das tabelas do banco de dados.
-    *   [ ] 2.3.2. Criar variáveis para o modelo (ex: níveis anteriores, chuva acumulada) e definir a variável alvo (nível futuro ou classe de risco).
+    *   [x] 2.3.2. Criar variáveis para o modelo (ex: níveis anteriores, chuva acumulada) e definir a variável alvo (nível futuro ou classe de risco).
     *   [ ] 2.3.3. Criar o dataset final para o modelo de ML, extraindo do DB, otimizado para séries temporais.
-    *   [ ] 2.3.4. Separar dados para treino/validação/teste.
+    *   [x] 2.3.4. Separar dados para treino/validação/teste.
     *   [ ] **Documentação:** Descrever as features criadas e a preparação do dataset para o ML na seção "Desenvolvimento" do PDF.
 
 ---
