@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "author": "Kild Bezerra Fernandes",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-dht22",
+      "id": "dht2",
+      "top": 662.7,
+      "left": -255,
+      "attrs": { "temperature": "-8.7", "humidity": "63.5" }
+    },
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 729.6, "left": -43.16, "attrs": {} },
+    {
+      "type": "wokwi-lcd2004",
+      "id": "lcd1",
+      "top": 784,
+      "left": 255.2,
+      "attrs": { "pins": "i2c" }
+    },
+    { "type": "wokwi-gnd", "id": "gnd1", "top": 700.8, "left": 191.4, "attrs": {} },
+    { "type": "wokwi-vcc", "id": "vcc1", "top": 682.36, "left": 163.2, "attrs": {} },
+    { "type": "wokwi-vcc", "id": "vcc4", "top": 730.36, "left": -307.2, "attrs": {} },
+    { "type": "wokwi-gnd", "id": "gnd5", "top": 825.6, "left": -221.4, "attrs": {} },
+    { "type": "chip-rain-sensor", "id": "chip1", "top": 500.22, "left": 321.6, "attrs": {} },
+    { "type": "wokwi-vcc", "id": "vcc7", "top": 413.56, "left": 268.8, "attrs": {} },
+    { "type": "wokwi-gnd", "id": "gnd4", "top": 595.2, "left": 201, "attrs": {} },
+    { "type": "wokwi-hc-sr04", "id": "ultrasonic1", "top": 318.3, "left": 15.1, "attrs": {} },
+    { "type": "wokwi-vcc", "id": "vcc2", "top": 615.16, "left": -144, "attrs": {} },
+    { "type": "wokwi-gnd", "id": "gnd2", "top": 643.2, "left": 37.8, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "lcd1:GND", "gnd1:GND", "black", [ "h0" ] ],
+    [ "lcd1:VCC", "vcc1:VCC", "red", [ "h0" ] ],
+    [ "lcd1:SDA", "esp:21", "cyan", [ "h-86.4", "v-28.6" ] ],
+    [ "esp:22", "lcd1:SCL", "cyan", [ "h124.8", "v67.2" ] ],
+    [ "dht22:VCC", "vcc4:VCC", "red", [ "h-28.8", "v-48" ] ],
+    [ "dht22:GND", "gnd5:GND", "black", [ "v0" ] ],
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "dht2:GND", "gnd5:GND", "black", [ "v0" ] ],
+    [ "vcc4:VCC", "dht2:VCC", "red", [ "v0" ] ],
+    [ "dht2:SDA", "esp:4", "cyan", [ "v0" ] ],
+    [ "esp:34", "chip1:AO", "blue", [ "h-67.05", "v-105.6", "h211.2", "v86.4" ] ],
+    [ "chip1:DO", "esp:16", "purple", [ "h-48", "v96" ] ],
+    [ "chip1:VCC", "vcc7:VCC", "red", [ "h0" ] ],
+    [ "chip1:GND", "gnd4:GND", "black", [ "h0" ] ],
+    [ "ultrasonic1:TRIG", "esp:18", "green", [ "v0" ] ],
+    [ "ultrasonic1:ECHO", "esp:17", "green", [ "v0" ] ],
+    [ "ultrasonic1:VCC", "vcc2:VCC", "red", [ "v0" ] ],
+    [ "ultrasonic1:GND", "gnd2:GND", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}
