@@ -473,3 +473,13 @@ def delete_alert(db: Session, alert_id: int):
     db.delete(alert)
     db.commit()
     return alert
+
+
+# ------------------- ResampledMeasurementsDaily View -------------------
+def get_resampled_measurements_daily(db: Session, start_date=None, end_date=None, limit=1000):
+    query = db.query(models.ResampledMeasurementsDaily)
+    if start_date:
+        query = query.filter(models.ResampledMeasurementsDaily.date >= start_date)
+    if end_date:
+        query = query.filter(models.ResampledMeasurementsDaily.date <= end_date)
+    return query.order_by(models.ResampledMeasurementsDaily.date).limit(limit).all()
