@@ -13,7 +13,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
-from database_session import Base
+from db.database_session import Base
 
 
 # River

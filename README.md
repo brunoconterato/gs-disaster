@@ -47,25 +47,32 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 ## 📊 **Arquitetura do Projeto**
 
-1. Treinamento do Modelo
-   - Carregar dados históricos reais (Ana HidroWeb) para treinar o modelo de previsão de enchentes
-   - Treinar modelo de previsão do nível máximo do rio do dia seguinte
-   - Salvar modelo treinado
+- Treinamento do Modelo
+   - Carregar dados históricos reais (Ana HidroWeb) para treinar o modelo de previsão de enchentes.
+   - Treinar modelo de previsão do nível máximo do rio do dia seguinte.
+   - Salvar modelo treinado.
 
-2. Programa 1: Coleta de Dados (ESP32)
-   - Medir nível do rio e precipitação
-   - Enviar dados via MQTT para o Programa 2
+- Banco de Dados
+   - Armazenar dados dos estações de monitoramento, trechos de rio, tipos de estações, etc.
+   - Armazenar dados dos sensores, tipo de sensores, etc.
+   - Armazenar dados do modelo treinado e métricas do modelo treinado.
+   - Armazenar dados de previsão de enchentes.
+   - Armazenar dados dos alertas.
 
-3. Programa 2: Recepção e Armazenamento
-   - Receber dados do ESP32 via MQTT
-   - Salvar dados em banco de dados
+- Programa 1: Coleta de Dados (ESP32)
+   - Medir nível do rio e precipitação.
+   - Enviar dados via MQTT para o Programa 2.
 
-4. Programa 3: Previsão e Alerta (executado diariamente via cronjob)
-   - Carregar dados do banco de dados
-   - Utilizar modelo treinado para prever o nível máximo do rio no dia seguinte
-   - Enviar alerta por e-mail se a previsão exceder X metros
+- Programa 2: Recepção e Armazenamento
+   - Receber dados do ESP32 via MQTT.
+   - Salvar dados em banco de dados.
 
-5. Programa 4: Dashboard Interativo - Streamlit (opcional)
+- Programa 3: Previsão e Alerta (executado diariamente via cronjob)
+   - Carregar dados do banco de dados.
+   - Utilizar modelo treinado para prever o nível máximo do rio no dia seguinte.
+   - Enviar alerta por e-mail se a previsão exceder X metros.
+
+- Programa 4: Dashboard Interativo (opcional)
 
 ---
 

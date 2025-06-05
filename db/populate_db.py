@@ -1,5 +1,11 @@
-from crud import *
-from database_session import get_db
+import sys
+import os
+
+# Add the parent directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from db.crud import *
+from db.database_session import get_db
 from datetime import datetime
 import pandas as pd
 from tqdm import tqdm
@@ -70,6 +76,8 @@ stations_data = [
         "description": "Zona rural - Hidrolândia - alguns kms após a cidade de Goiânia",
     },
 ]
+
+# TODO: insert models and metrics
 
 # Station codes for sensor identifiers
 station_codes = ["60640000", "60650000", "60655001"]
@@ -348,8 +356,11 @@ def main():
                     calibration_date=None,
                     status="Operational",
                 )
+        
         # Save raw measurements after all sensors are created
-        load_and_save_raw_measurements(db)
+        # TODO: needs performance improvements
+        # load_and_save_raw_measurements(db)
+
         # Create the resampled view after populating raw data
 
         engine = create_engine(DATABASE_URL)

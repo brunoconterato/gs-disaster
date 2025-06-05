@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
-import models
-
+from db import models
 
 # ------------------- River -------------------
 def create_river(db: Session, river_name: str, description: str = None):

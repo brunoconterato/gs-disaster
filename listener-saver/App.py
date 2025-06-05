@@ -4,6 +4,8 @@ import time
 import SensorData
 from db.database_session import get_db
 
+# TODO: use the new sensor_measurement table
+
 # MQTT Credentials
 MQTT_BROKER = "759d2f782c6f48d68eafab33492641f8.s1.eu.hivemq.cloud"
 MQTT_PORT = 8883

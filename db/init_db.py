@@ -1,8 +1,13 @@
-from database_session import get_db
-from models import *
-from database_session import Base
-from sqlalchemy import text
+import sys
+import os
 
+# Add the parent directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from db.database_session import get_db
+from db.models import *
+from db.database_session import Base
+from sqlalchemy import text
 
 # Database initialization
 def init_db():
@@ -11,6 +16,7 @@ def init_db():
             conn.execute(
                 text("DROP VIEW IF EXISTS resampled_measurements_daily CASCADE;")
             )
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis;"))
             conn.commit()
         Base.metadata.drop_all(db.bind)  # Drop all tables
         Base.metadata.create_all(db.bind)  # Recreate all tables
