@@ -1,8 +1,8 @@
 import sys
 import os
 
-# Add the parent directory to the Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add the project root directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from db.crud import *
 from db.database_session import get_db
@@ -11,7 +11,7 @@ import pandas as pd
 from tqdm import tqdm
 from sqlalchemy import text
 from sqlalchemy import create_engine
-from database_session import DATABASE_URL
+from db.database_session import DATABASE_URL
 
 # 1. River
 river_data = {
@@ -76,8 +76,6 @@ stations_data = [
         "description": "Zona rural - Hidrolândia - alguns kms após a cidade de Goiânia",
     },
 ]
-
-# TODO: insert models and metrics
 
 # Station codes for sensor identifiers
 station_codes = ["60640000", "60650000", "60655001"]
@@ -354,6 +352,18 @@ def main():
                     status="Operational",
                 )
         
+        # Models
+        # TODO: insert real models and metrics
+
+        # model
+        create_ml_model(
+            db,
+            model_name="LSTM",
+            model_type="LSTM",
+            training_date=datetime.now(),
+            performance_metrics={},
+        )
+
         # Save raw measurements after all sensors are created
         # TODO: needs performance improvements
         # load_and_save_raw_measurements(db)

@@ -112,7 +112,7 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     POSTGRES_PORT="5432"
     POSTGRES_USER="user"
     POSTGRES_PASSWORD="password"
-    POSTGRES_DB="gsdisaster"
+    POSTGRES_DB="hydroguard"
     ```
 
 4.  **Execute o Docker Compose para iniciar o banco de dados:**
@@ -124,7 +124,7 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
     5.1 Execute o script de inicialização para criar as tabelas:
         ```bash
-        python db/init_db.py
+        python db/scripts/init_db.py
         ```
 
         Isso criará todas as tabelas conforme definidas em `models.py`.
@@ -133,7 +133,7 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
         Execute:
 
         ```bash
-        python db/populate_db.py
+        python db/scripts/populate_db.py
         ```
 
         Esse script insere um rio, um trecho, tipos de estação e sensor, três estações de monitoramento e nove sensores, conforme os dados reais do Rio Meia Ponte (Goiás).
@@ -179,7 +179,7 @@ O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para conc
 ├── doc                     # Documentação do projeto (relatórios, etc.)
 │   └── tmp
 │       └── Fontes.md
-├── README.md               # Este arquivo!
+├── README.md               # Este arquivo
 └── ref                     # Materiais de referência e pesquisa
     └── LaleskaAparecidaFerreiraMesquita # Dissertação de Mestrado
         ├── LaleskaAparecidaFerreiraMesquita_ME_revisada.md
@@ -201,6 +201,8 @@ O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para conc
 | Ambiente               | Jupyter Notebook, CUDA (GPU)  |
 | IoT/Hardware           | ESP32, Wokwi (simulação)      |
 | Comunicação            | PySerial                      |
+| Banco de Dados         | PostgreSQL                    |
+| Containerização        | Docker, Docker Compose        |
 
 ---
 

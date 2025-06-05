@@ -8,12 +8,13 @@ O banco de dados do HydroGuard foi projetado para armazenar informações de rio
 
 - **Tecnologia:** PostgreSQL + PostGIS
 - **ORM:** SQLAlchemy + GeoAlchemy2
-- **Scripts principais:**
-  - `init_db.py`: Criação das tabelas
-  - `populate_db.py`: População inicial de dados
-  - `crud.py`: Funções de manipulação (Create, Read, Update, Delete)
-  - `models.py`: Definição das entidades e relacionamentos
-  - `database_session.py`: Configuração da conexão e sessão
+- **Scripts:**
+  - `db/scripts/init_db.py`: Criação das tabelas
+  - `db/scripts/populate_db.py`: População inicial de dados
+- **Biblioteca:**
+  - `db/crud.py`: Funções de manipulação (Create, Read, Update, Delete)
+  - `db/models.py`: Definição das entidades e relacionamentos
+  - `db/database_session.py`: Configuração da conexão e sessão
 
 ## 2. Instalação de Dependências
 
@@ -31,8 +32,8 @@ sudo apt-get install postgresql postgis postgresql-14-postgis-3
 - **db/models.py**: Define as classes das entidades e seus relacionamentos, incluindo tipos geoespaciais (POINT, LINESTRING).
 - **db/crud.py**: Funções para criar, consultar, atualizar e deletar registros de cada entidade.
 - **db/database_session.py**: Configura a conexão com o banco usando variáveis de ambiente e fornece o gerenciador de sessão.
-- **db/init_db.py**: Cria todas as tabelas no banco de dados.
-- **db/populate_db.py**: Popula o banco com dados iniciais de exemplo.
+- **db/scripts/init_db.py**: Cria todas as tabelas no banco de dados.
+- **db/scripts/populate_db.py**: Popula o banco com dados iniciais de exemplo.
 
 ## 4. Dicas e Resolução de Problemas
 
