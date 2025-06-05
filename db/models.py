@@ -222,53 +222,18 @@ class Alert(Base):
         return f"<Alert(id_alert={self.id_alert}, severity='{self.severity}')>"
 
 
-class ResampledMeasurementsDaily(Base):
-    __tablename__ = "resampled_measurements_daily"
-    __table_args__ = {"extend_existing": True}
-
-    date = Column(Date, primary_key=True)
-    rain_upstream_mean = Column(Float)
-    rain_upstream_max = Column(Float)
-    rain_upstream_min = Column(Float)
-    rain_upstream_q25 = Column(Float)
-    rain_upstream_q75 = Column(Float)
-    level_upstream_mean = Column(Float)
-    level_upstream_max = Column(Float)
-    level_upstream_min = Column(Float)
-    level_upstream_q25 = Column(Float)
-    level_upstream_q75 = Column(Float)
-    flow_upstream_mean = Column(Float)
-    flow_upstream_max = Column(Float)
-    flow_upstream_min = Column(Float)
-    flow_upstream_q25 = Column(Float)
-    flow_upstream_q75 = Column(Float)
-    rain_downstream_mean = Column(Float)
-    rain_downstream_max = Column(Float)
-    rain_downstream_min = Column(Float)
-    rain_downstream_q25 = Column(Float)
-    rain_downstream_q75 = Column(Float)
-    level_downstream_mean = Column(Float)
-    level_downstream_max = Column(Float)
-    level_downstream_min = Column(Float)
-    level_downstream_q25 = Column(Float)
-    level_downstream_q75 = Column(Float)
-    flow_downstream_mean = Column(Float)
-    flow_downstream_max = Column(Float)
-    flow_downstream_min = Column(Float)
-    flow_downstream_q25 = Column(Float)
-    flow_downstream_q75 = Column(Float)
-    rain_after_mean = Column(Float)
-    rain_after_max = Column(Float)
-    rain_after_min = Column(Float)
-    rain_after_q25 = Column(Float)
-    rain_after_q75 = Column(Float)
-    level_after_mean = Column(Float)
-    level_after_max = Column(Float)
-    level_after_min = Column(Float)
-    level_after_q25 = Column(Float)
-    level_after_q75 = Column(Float)
-    flow_after_mean = Column(Float)
-    flow_after_max = Column(Float)
-    flow_after_min = Column(Float)
-    flow_after_q25 = Column(Float)
-    flow_after_q75 = Column(Float)
+# --- ResampledMeasurementsDaily view mapping ---
+# This is a VIEW, not a table. Do NOT include in Base.metadata.create_all/drop_all.
+# To use in SQLAlchemy, reflect it as a Table:
+#
+# from sqlalchemy import Table
+# from database_session import get_db
+#
+# with get_db() as db:
+#     ResampledMeasurementsDaily = Table(
+#         'resampled_measurements_daily',
+#         Base.metadata,
+#         autoload_with=db.bind
+#     )
+#
+# Or use SQLAlchemy Core for read-only queries.

@@ -11,6 +11,15 @@ def init_db():
             conn.execute(
                 text("DROP VIEW IF EXISTS resampled_measurements_daily CASCADE;")
             )
+            # conn.execute(
+            #     text(
+            #         """
+            #         CREATE VIEW resampled_measurements_daily AS
+            #         SELECT CURRENT_DATE as date -- Replace with your actual view definition
+            #         -- , ...
+            #         """
+            #     )
+            # )
             conn.commit()
         Base.metadata.drop_all(db.bind)  # Drop all tables
         Base.metadata.create_all(db.bind)  # Recreate all tables
