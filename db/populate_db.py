@@ -93,10 +93,11 @@ RAW_SENSOR_COLUMN_TO_ID = {
 }
 
 
-def save_raw_measurements_copy(df, station, engine):
+def save_raw_measurements(df, station, engine):
     # Prepare the data in the right format
+    print("[INFO] Saving raw measurements to the database for ", station)
     rows = []
-    for _, row in df.iterrows():
+    for _, row in tqdm(df.iterrows(), total=len(df), desc=f"Saving {station} measurements", colour="cyan"):
         try:
             timestamp = pd.to_datetime(f"{row['Data']} {row['Hora']}", dayfirst=True)
         except Exception:
@@ -129,38 +130,7 @@ def save_raw_measurements_copy(df, station, engine):
     conn.commit()
     cursor.close()
     conn.close()
-
-
-def save_raw_measurements(df, station, db):
-    for _, row in tqdm(
-        df.iterrows(), total=len(df), desc=f"Saving {station} raw measurements"
-    ):
-        # Parse timestamp
-        try:
-            timestamp = pd.to_datetime(f"{row['Data']} {row['Hora']}", dayfirst=True)
-        except Exception:
-            continue
-        for col in ["Chuva (mm)", "Vazão (m3/s)", "Nível (cm)"]:
-            sensor_id = RAW_SENSOR_COLUMN_TO_ID.get((station, col))
-            value = row.get(col)
-            if sensor_id is not None and pd.notnull(value):
-                create_sensor_measurement = getattr(
-                    __import__("crud"), "create_sensor_measurement", None
-                )
-                if create_sensor_measurement is None:
-                    from crud import create_sensor_measurement
-                else:
-                    create_sensor_measurement = getattr(
-                        __import__("crud"), "create_sensor_measurement"
-                    )
-                create_sensor_measurement(
-                    db,
-                    id_sensor=sensor_id,
-                    measurement_value=value,
-                    timestamp=timestamp,
-                    data_source="raw",
-                    quality_flag="",  # Pass empty string instead of None
-                )
+    print(f"[OK] Saved {station} raw measurements to the database.")
 
 
 def load_and_save_raw_measurements(db):
@@ -229,9 +199,9 @@ def load_and_save_raw_measurements(db):
     )
     after_data = after_data.loc[:, ~after_data.columns.str.contains("^Unnamed")]
 
-    save_raw_measurements_copy(upstream_data, "upstream", engine)
-    save_raw_measurements_copy(downstream_data, "downstream", engine)
-    save_raw_measurements_copy(after_data, "after", engine)
+    save_raw_measurements(upstream_data, "upstream", engine)
+    save_raw_measurements(downstream_data, "downstream", engine)
+    save_raw_measurements(after_data, "after", engine)
     print("Saved all raw measurements to the database.")
 
 
@@ -244,7 +214,14 @@ def create_resampled_view(engine):
             text(
                 """
                 CREATE OR REPLACE VIEW resampled_measurements_daily AS
-                WITH base AS (
+                WITH date_range AS (
+                    SELECT generate_series(
+                        (SELECT MIN(date_trunc('day', timestamp)) FROM sensor_measurement WHERE data_source = 'raw'),
+                        (SELECT MAX(date_trunc('day', timestamp)) FROM sensor_measurement WHERE data_source = 'raw'),
+                        interval '1 day'
+                    )::date AS date
+                ),
+                base AS (
                     SELECT
                         date_trunc('day', timestamp) AS date,
                         id_sensor,
@@ -254,12 +231,13 @@ def create_resampled_view(engine):
                 ),
                 pivot AS (
                     SELECT
-                        date,
-                        AVG(CASE WHEN id_sensor = 1 THEN measurement_value END) AS rain_upstream_mean,
-                        MAX(CASE WHEN id_sensor = 1 THEN measurement_value END) AS rain_upstream_max,
-                        MIN(CASE WHEN id_sensor = 1 THEN measurement_value END) AS rain_upstream_min,
-                        percentile_cont(0.25) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 1 THEN measurement_value END) AS rain_upstream_q25,
-                        percentile_cont(0.75) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 1 THEN measurement_value END) AS rain_upstream_q75,
+                        d.date,
+                        -- Rain: fill missing with 0
+                        COALESCE(AVG(CASE WHEN id_sensor = 1 THEN measurement_value END), 0) AS rain_upstream_mean,
+                        COALESCE(MAX(CASE WHEN id_sensor = 1 THEN measurement_value END), 0) AS rain_upstream_max,
+                        COALESCE(MIN(CASE WHEN id_sensor = 1 THEN measurement_value END), 0) AS rain_upstream_min,
+                        COALESCE(percentile_cont(0.25) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 1 THEN measurement_value END), 0) AS rain_upstream_q25,
+                        COALESCE(percentile_cont(0.75) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 1 THEN measurement_value END), 0) AS rain_upstream_q75,
                         AVG(CASE WHEN id_sensor = 3 THEN measurement_value END) AS level_upstream_mean,
                         MAX(CASE WHEN id_sensor = 3 THEN measurement_value END) AS level_upstream_max,
                         MIN(CASE WHEN id_sensor = 3 THEN measurement_value END) AS level_upstream_min,
@@ -270,11 +248,11 @@ def create_resampled_view(engine):
                         MIN(CASE WHEN id_sensor = 2 THEN measurement_value END) AS flow_upstream_min,
                         percentile_cont(0.25) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 2 THEN measurement_value END) AS flow_upstream_q25,
                         percentile_cont(0.75) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 2 THEN measurement_value END) AS flow_upstream_q75,
-                        AVG(CASE WHEN id_sensor = 4 THEN measurement_value END) AS rain_downstream_mean,
-                        MAX(CASE WHEN id_sensor = 4 THEN measurement_value END) AS rain_downstream_max,
-                        MIN(CASE WHEN id_sensor = 4 THEN measurement_value END) AS rain_downstream_min,
-                        percentile_cont(0.25) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 4 THEN measurement_value END) AS rain_downstream_q25,
-                        percentile_cont(0.75) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 4 THEN measurement_value END) AS rain_downstream_q75,
+                        COALESCE(AVG(CASE WHEN id_sensor = 4 THEN measurement_value END), 0) AS rain_downstream_mean,
+                        COALESCE(MAX(CASE WHEN id_sensor = 4 THEN measurement_value END), 0) AS rain_downstream_max,
+                        COALESCE(MIN(CASE WHEN id_sensor = 4 THEN measurement_value END), 0) AS rain_downstream_min,
+                        COALESCE(percentile_cont(0.25) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 4 THEN measurement_value END), 0) AS rain_downstream_q25,
+                        COALESCE(percentile_cont(0.75) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 4 THEN measurement_value END), 0) AS rain_downstream_q75,
                         AVG(CASE WHEN id_sensor = 6 THEN measurement_value END) AS level_downstream_mean,
                         MAX(CASE WHEN id_sensor = 6 THEN measurement_value END) AS level_downstream_max,
                         MIN(CASE WHEN id_sensor = 6 THEN measurement_value END) AS level_downstream_min,
@@ -285,11 +263,11 @@ def create_resampled_view(engine):
                         MIN(CASE WHEN id_sensor = 5 THEN measurement_value END) AS flow_downstream_min,
                         percentile_cont(0.25) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 5 THEN measurement_value END) AS flow_downstream_q25,
                         percentile_cont(0.75) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 5 THEN measurement_value END) AS flow_downstream_q75,
-                        AVG(CASE WHEN id_sensor = 7 THEN measurement_value END) AS rain_after_mean,
-                        MAX(CASE WHEN id_sensor = 7 THEN measurement_value END) AS rain_after_max,
-                        MIN(CASE WHEN id_sensor = 7 THEN measurement_value END) AS rain_after_min,
-                        percentile_cont(0.25) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 7 THEN measurement_value END) AS rain_after_q25,
-                        percentile_cont(0.75) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 7 THEN measurement_value END) AS rain_after_q75,
+                        COALESCE(AVG(CASE WHEN id_sensor = 7 THEN measurement_value END), 0) AS rain_after_mean,
+                        COALESCE(MAX(CASE WHEN id_sensor = 7 THEN measurement_value END), 0) AS rain_after_max,
+                        COALESCE(MIN(CASE WHEN id_sensor = 7 THEN measurement_value END), 0) AS rain_after_min,
+                        COALESCE(percentile_cont(0.25) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 7 THEN measurement_value END), 0) AS rain_after_q25,
+                        COALESCE(percentile_cont(0.75) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 7 THEN measurement_value END), 0) AS rain_after_q75,
                         AVG(CASE WHEN id_sensor = 9 THEN measurement_value END) AS level_after_mean,
                         MAX(CASE WHEN id_sensor = 9 THEN measurement_value END) AS level_after_max,
                         MIN(CASE WHEN id_sensor = 9 THEN measurement_value END) AS level_after_min,
@@ -300,8 +278,181 @@ def create_resampled_view(engine):
                         MIN(CASE WHEN id_sensor = 8 THEN measurement_value END) AS flow_after_min,
                         percentile_cont(0.25) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 8 THEN measurement_value END) AS flow_after_q25,
                         percentile_cont(0.75) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 8 THEN measurement_value END) AS flow_after_q75
-                    FROM base
-                    GROUP BY date
+                    FROM date_range d
+                    LEFT JOIN base b ON d.date = b.date
+                    GROUP BY d.date
+                ),
+                filled AS (
+                    SELECT
+                        date,
+                        rain_upstream_mean,
+                        rain_upstream_max,
+                        rain_upstream_min,
+                        rain_upstream_q25,
+                        rain_upstream_q75,
+                        -- Level upstream: fill nulls with forward then backward fill
+                        COALESCE(
+                            LAST_VALUE(level_upstream_mean IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_upstream_mean IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_upstream_mean,
+                        COALESCE(
+                            LAST_VALUE(level_upstream_max IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_upstream_max IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_upstream_max,
+                        COALESCE(
+                            LAST_VALUE(level_upstream_min IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_upstream_min IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_upstream_min,
+                        COALESCE(
+                            LAST_VALUE(level_upstream_q25 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_upstream_q25 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_upstream_q25,
+                        COALESCE(
+                            LAST_VALUE(level_upstream_q75 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_upstream_q75 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_upstream_q75,
+                        -- Flow upstream: fill nulls with forward then backward fill
+                        COALESCE(
+                            LAST_VALUE(flow_upstream_mean IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_upstream_mean IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_upstream_mean,
+                        COALESCE(
+                            LAST_VALUE(flow_upstream_max IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_upstream_max IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_upstream_max,
+                        COALESCE(
+                            LAST_VALUE(flow_upstream_min IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_upstream_min IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_upstream_min,
+                        COALESCE(
+                            LAST_VALUE(flow_upstream_q25 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_upstream_q25 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_upstream_q25,
+                        COALESCE(
+                            LAST_VALUE(flow_upstream_q75 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_upstream_q75 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_upstream_q75,
+                        rain_downstream_mean,
+                        rain_downstream_max,
+                        rain_downstream_min,
+                        rain_downstream_q25,
+                        rain_downstream_q75,
+                        COALESCE(
+                            LAST_VALUE(level_downstream_mean IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_downstream_mean IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_downstream_mean,
+                        COALESCE(
+                            LAST_VALUE(level_downstream_max IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_downstream_max IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_downstream_max,
+                        COALESCE(
+                            LAST_VALUE(level_downstream_min IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_downstream_min IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_downstream_min,
+                        COALESCE(
+                            LAST_VALUE(level_downstream_q25 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_downstream_q25 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_downstream_q25,
+                        COALESCE(
+                            LAST_VALUE(level_downstream_q75 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_downstream_q75 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_downstream_q75,
+                        COALESCE(
+                            LAST_VALUE(flow_downstream_mean IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_downstream_mean IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_downstream_mean,
+                        COALESCE(
+                            LAST_VALUE(flow_downstream_max IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_downstream_max IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_downstream_max,
+                        COALESCE(
+                            LAST_VALUE(flow_downstream_min IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_downstream_min IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_downstream_min,
+                        COALESCE(
+                            LAST_VALUE(flow_downstream_q25 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_downstream_q25 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_downstream_q25,
+                        COALESCE(
+                            LAST_VALUE(flow_downstream_q75 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_downstream_q75 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_downstream_q75,
+                        rain_after_mean,
+                        rain_after_max,
+                        rain_after_min,
+                        rain_after_q25,
+                        rain_after_q75,
+                        COALESCE(
+                            LAST_VALUE(level_after_mean IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_after_mean IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_after_mean,
+                        COALESCE(
+                            LAST_VALUE(level_after_max IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_after_max IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_after_max,
+                        COALESCE(
+                            LAST_VALUE(level_after_min IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_after_min IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_after_min,
+                        COALESCE(
+                            LAST_VALUE(level_after_q25 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_after_q25 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_after_q25,
+                        COALESCE(
+                            LAST_VALUE(level_after_q75 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(level_after_q75 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS level_after_q75,
+                        COALESCE(
+                            LAST_VALUE(flow_after_mean IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_after_mean IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_after_mean,
+                        COALESCE(
+                            LAST_VALUE(flow_after_max IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_after_max IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_after_max,
+                        COALESCE(
+                            LAST_VALUE(flow_after_min IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_after_min IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_after_min,
+                        COALESCE(
+                            LAST_VALUE(flow_after_q25 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_after_q25 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_after_q25,
+                        COALESCE(
+                            LAST_VALUE(flow_after_q75 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            FIRST_VALUE(flow_after_q75 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            0
+                        ) AS flow_after_q75
+                    FROM pivot
                 ),
                 feat AS (
                     SELECT *,
@@ -316,7 +467,7 @@ def create_resampled_view(engine):
                         EXTRACT(YEAR FROM date) AS year,
                         SIN(2 * PI() * (EXTRACT(DOY FROM date)-1) / (CASE WHEN EXTRACT(YEAR FROM date) % 4 = 0 THEN 366 ELSE 365 END)) AS date_sin,
                         COS(2 * PI() * (EXTRACT(DOY FROM date)-1) / (CASE WHEN EXTRACT(YEAR FROM date) % 4 = 0 THEN 366 ELSE 365 END)) AS date_cos
-                    FROM pivot
+                    FROM filled
                 )
                 SELECT * FROM feat
                 ORDER BY date

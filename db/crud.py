@@ -481,9 +481,7 @@ def delete_alert(db: Session, alert_id: int):
 def get_resampled_measurements_daily(db, start_date=None, end_date=None, limit=1000):
     # Reflect the view as a Table for read-only queries
     ResampledMeasurementsDaily = Table(
-        'resampled_measurements_daily',
-        Base.metadata,
-        autoload_with=db.bind
+        "resampled_measurements_daily", Base.metadata, autoload_with=db.bind
     )
     query = select(ResampledMeasurementsDaily)
     if start_date:
