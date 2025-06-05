@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
-import models
+# import models
 from sqlalchemy import Table, select
 from database_session import Base
-
+from db import models
 
 # ------------------- River -------------------
 def create_river(db: Session, river_name: str, description: str = None):

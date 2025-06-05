@@ -45,6 +45,150 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 ---
 
+## 📊 **Arquitetura do Projeto**
+
+- Treinamento do Modelo
+   - Carregar dados históricos reais (Ana HidroWeb) para treinar o modelo de previsão de enchentes.
+   - Treinar modelo de previsão do nível máximo do rio do dia seguinte.
+   - Salvar modelo treinado.
+
+- Banco de Dados
+   - Armazenar dados dos estações de monitoramento, trechos de rio, tipos de estações, etc.
+   - Armazenar dados dos sensores, tipo de sensores, etc.
+   - Armazenar dados do modelo treinado e métricas do modelo treinado.
+   - Armazenar dados de previsão de enchentes.
+   - Armazenar dados dos alertas.
+
+- Programa 1: Coleta de Dados (ESP32)
+   - Medir nível do rio e precipitação.
+   - Enviar dados via MQTT para o Programa 2.
+
+- Programa 2: Recepção e Armazenamento
+   - Receber dados do ESP32 via MQTT.
+   - Salvar dados em banco de dados.
+
+- Programa 3: Previsão e Alerta (executado diariamente via cronjob)
+   - Carregar dados do banco de dados.
+   - Utilizar modelo treinado para prever o nível máximo do rio no dia seguinte.
+   - Enviar alerta por e-mail se a previsão exceder X metros.
+
+- Programa 4: Dashboard Interativo (opcional)
+
+---
+
+## 🏃‍♀️ **Como Rodar o Projeto (MVP)**
+
+### Preparando do Ambiente
+
+- Certifique-se de ter o Python 3.8+ instalado.
+
+### Instalação do Python
+
+1.  **Clone o Repositório:**
+    ```bash
+    git clone https://github.com/brunoconterato/gs-disaster.git
+    cd gs-disaster
+    ```
+
+2. **Ative o ambiente virtual:**
+    ```bash
+    source .venv/bin/activate # linux
+    .venv/Scripts/activate # windows
+    ```
+
+3.  **Instale as Dependências Python:**
+    ```bash
+    pip install -r requirements.txt # (Será criado um arquivo requirements.txt com as libs necessárias)
+    ```
+
+3.  **Crie o arquivo .env:**
+    ```bash
+    cp .env.example .env
+    ```
+
+3. **Adicione as variáveis de ambiente:**
+    ```bash
+    POSTGRES_HOST="localhost"
+    POSTGRES_PORT="5432"
+    POSTGRES_USER="user"
+    POSTGRES_PASSWORD="password"
+    POSTGRES_DB="hydroguard"
+    ```
+
+4.  **Execute o Docker Compose para iniciar o banco de dados:**
+    ```bash
+    docker-compose up -d
+    ```
+
+5.  **Execute o script para inicializar o banco de dados (primeira vez):**
+
+    5.1 Execute o script de inicialização para criar as tabelas:
+        ```bash
+        python db/scripts/init_db.py
+        ```
+
+        Isso criará todas as tabelas conforme definidas em `models.py`.
+
+    5.2 **Popule o banco com dados de exemplo**
+        Execute:
+
+        ```bash
+        python db/scripts/populate_db.py
+        ```
+
+        Esse script insere um rio, um trecho, tipos de estação e sensor, três estações de monitoramento e nove sensores, conforme os dados reais do Rio Meia Ponte (Goiás).
+
+6.  **Execute a Simulação do ESP32 no Wokwi:**
+    *   Abra o link do projeto ESP32 no Wokwi (o link será fornecido na documentação do PDF).
+    *   Inicie a simulação (play button).
+    *   Manipule os sliders para simular o nível da água e a precipitação.
+
+7.  **Execute os Script Python:**
+    *  Abra o Jupyter Notebook ou execute os scripts Python diretamente.
+
+Para mais detalhes sobre o banco de dados, consulte a [documentação do banco de dados](doc/db/db-instructions.md).
+
+---
+
+## ✨ **Próximos Passos e Melhorias Futuras**
+
+O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para concorrer ao pódio, pretendemos explorar:
+
+*   **Modelos de ML Mais Avançados:** Implementação de Redes Neurais Recorrentes (RNNs/LSTMs) para aprimorar a previsão de séries temporais, inspiradas na tese de referência.
+*   **Integração com Banco de Dados:** Armazenamento persistente de dados de sensores e previsões.
+*   **Computação em Nuvem:** Deploy do sistema de monitoramento e ML em plataformas de nuvem para escalabilidade.
+*   **Dashboards Interativos:** Desenvolvimento de uma interface gráfica para visualização em tempo real e configuração de alertas.
+*   **Alerta Multi-canal:** Envio de alertas via SMS ou e-mail para autoridades e população.
+*   **Validação com Dados Reais:** Testes em cenários reais com estações de monitoramento.
+
+---
+
+## 📂 **Estrutura do Projeto**
+
+```txt
+.
+├── asset                   # Imagens e diagramas do projeto (ex: circuitos, arquitetura)
+│   ├── image_labels.png
+│   └── image_raw.png
+├── data                    # Dados brutos e pré-processados
+│   ├── ANA HIDROWEB
+│   │   └── RIO MEIA PONTE  # Dados CSV de estações ANA
+│   │       ├── 60640000-MONTANTE DE GOIANIA.csv
+│   │       ├── 60650000-JUSANTE DE GOIANIA.csv
+│   │       └── 60655001-UHE SAO SIMAO FAZENDA BONITA DE BAIXO.
+├── doc                     # Documentação do projeto (relatórios, etc.)
+│   └── tmp
+│       └── Fontes.md
+├── README.md               # Este arquivo
+└── ref                     # Materiais de referência e pesquisa
+    └── LaleskaAparecidaFerreiraMesquita # Dissertação de Mestrado
+        ├── LaleskaAparecidaFerreiraMesquita_ME_revisada.md
+        ├── LaleskaAparecidaFerreiraMesquita_ME_revisada.pdf
+        └── ref.md
+```
+
+---
+
 ## 🛠️ **Tecnologias Utilizadas**
 
 | Categoria              | Ferramentas                   |
@@ -57,6 +201,8 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 | Ambiente               | Jupyter Notebook, CUDA (GPU)  |
 | IoT/Hardware           | ESP32, Wokwi (simulação)      |
 | Comunicação            | PySerial                      |
+| Banco de Dados         | PostgreSQL                    |
+| Containerização        | Docker, Docker Compose        |
 
 ---
 
@@ -77,62 +223,4 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 ---
 
-## 🏃‍♀️ **Como Rodar o Projeto (MVP)**
-
-1.  **Clone o Repositório:**
-    ```bash
-    git clone https://github.com/luisfuturist/gs-disaster.git
-    cd gs-disaster
-    ```
-2.  **Instale as Dependências Python:**
-    ```bash
-    pip install -r requirements.txt # (Será criado um arquivo requirements.txt com as libs necessárias)
-    ```
-3.  **Execute a Simulação do ESP32 no Wokwi:**
-    *   Abra o link do projeto ESP32 no Wokwi (o link será fornecido na documentação do PDF).
-    *   Inicie a simulação (play button).
-    *   Manipule os sliders para simular o nível da água e a precipitação.
-4.  **Execute os Script Python:**
-    *  Abra o Jupyter Notebook ou execute os scripts Python diretamente.
-
----
-
-## 📂 **Estrutura do Projeto**
-
-```
-.
-├── asset                   # Imagens e diagramas do projeto (ex: circuitos, arquitetura)
-│   ├── image_labels.png
-│   └── image_raw.png
-├── data                    # Dados brutos e pré-processados
-│   ├── ANA HIDROWEB
-│   │   └── RIO MEIA PONTE  # Dados CSV de estações ANA
-│   │       ├── 60640000-MONTANTE DE GOIANIA.csv
-│   │       ├── 60650000-JUSANTE DE GOIANIA.csv
-│   │       └── 60655001-UHE SAO SIMAO FAZENDA BONITA DE BAIXO.
-├── doc                     # Documentação do projeto (relatórios, etc.)
-│   └── tmp
-│       └── Fontes.md
-├── README.md               # Este arquivo!
-└── ref                     # Materiais de referência e pesquisa
-    └── LaleskaAparecidaFerreiraMesquita # Dissertação de Mestrado
-        ├── LaleskaAparecidaFerreiraMesquita_ME_revisada.md
-        ├── LaleskaAparecidaFerreiraMesquita_ME_revisada.pdf
-        └── ref.md
-```
-
----
-
-## ✨ **Próximos Passos e Melhorias Futuras**
-
-O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para concorrer ao pódio, pretendemos explorar:
-
-*   **Modelos de ML Mais Avançados:** Implementação de Redes Neurais Recorrentes (RNNs/LSTMs) para aprimorar a previsão de séries temporais, inspiradas na tese de referência.
-*   **Integração com Banco de Dados:** Armazenamento persistente de dados de sensores e previsões.
-*   **Computação em Nuvem:** Deploy do sistema de monitoramento e ML em plataformas de nuvem para escalabilidade.
-*   **Dashboards Interativos:** Desenvolvimento de uma interface gráfica para visualização em tempo real e configuração de alertas.
-*   **Alerta Multi-canal:** Envio de alertas via SMS ou e-mail para autoridades e população.
-*   **Validação com Dados Reais:** Testes em cenários reais com estações de monitoramento.
-
----
 **Desenvolvido com paixão e inteligência para um futuro mais seguro.**

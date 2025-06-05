@@ -4,6 +4,8 @@ from contextlib import contextmanager
 from dotenv import load_dotenv
 from datetime import datetime
 
+# TODO: use the new sensor_measurement table
+
 class SensorData():
     __tablename__ = 'sensor_data'
     id = Column(Integer, primary_key=True, autoincrement=True)

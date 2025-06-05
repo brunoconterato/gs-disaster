@@ -1,13 +1,24 @@
 {
+    "files.exclude": {
+        "**/__pycache__": true
+    },
     "sqltools.connections": [
         {
             "previewLimit": 50,
             "server": "localhost",
             "port": 5432,
+            "askForPassword": true,
             "driver": "PostgreSQL",
-            "name": "gs-disaster",
-            "database": "gs-disaster",
-            "username": "gs"
+            "name": "hydroguard",
+            "database": "hydroguard",
+            "username": "user"
         }
-    ]
+    ],
+    "sqltools.sessionFilesFolder": "./db/session_files",
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.expand": false,
+    "explorer.fileNesting.patterns": {
+      "docker-compose.yml": ".env*, requirements.txt, .gitignore",
+      "app.vue": "error.vue"
+    },
 }

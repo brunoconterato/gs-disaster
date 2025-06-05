@@ -1,11 +1,17 @@
+import sys
+import os
+
+# Add the project root directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from crud import *
 from database_session import get_db, engine
+
 from datetime import datetime
 import pandas as pd
 from tqdm import tqdm
 from sqlalchemy import text
-from database_session import DATABASE_URL
-import psycopg2
 import io
 
 # 1. River
@@ -566,6 +572,7 @@ def main():
         print("[INFO] Loading and saving raw measurements...")
         load_and_save_raw_measurements(db)
         print("[OK] Raw measurements loaded and saved.")
+
         # Create the resampled view after populating raw data
         print("[INFO] Creating resampled view...")
         create_resampled_view(engine)

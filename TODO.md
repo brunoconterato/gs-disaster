@@ -10,11 +10,11 @@ Desenvolver um MVP de um sistema que monitora o nível de rios e precipitação 
 ### **Fase 1: Planejamento e Base**
 
 *   [ ] **1.1. Alinhamento e Distribuição de Tarefas**
-    *   [ ] Reunião de grupo para definir o escopo exato do MVP e atribuir responsáveis.
+    *   [x] Reunião de grupo para definir o escopo exato do MVP e atribuir responsáveis.
     *   [ ] **Documentação:** Criar rascunho da seção "Introdução" do PDF, incluindo a descrição da solução.
 *   [ ] **1.2. Estudo de Referência e Ambiente**
     *   [x] Estudar a dissertação da Laleska (parte de dados e ML para enchentes).
-    *   [ ] Configurar ambiente Python.
+    *   [x] Configurar ambiente Python.
     *   [ ] Configurar ambiente Wokwi.
     *   [ ] **Documentação:** Incluir instruções de configuração do ambiente Python e Wokwi.
     *   [ ] **Documentação:** Incluir referências bibliográficas e links úteis na seção "Referências" do PDF.
