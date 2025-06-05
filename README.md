@@ -45,35 +45,27 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 ---
 
-## 🛠️ **Tecnologias Utilizadas**
+## 📊 **Arquitetura do Projeto**
 
-| Categoria              | Ferramentas                   |
-| :--------------------- | :---------------------------- |
-| Linguagem              | Python 3.9+                   |
-| Manipulação de Dados   | Pandas, NumPy                 |
-| Visualização           | Matplotlib                    |
-| Aprendizado Profundo   | PyTorch                       |
-| Pré-processamento      | Scikit-learn (StandardScaler) |
-| Ambiente               | Jupyter Notebook, CUDA (GPU)  |
-| IoT/Hardware           | ESP32, Wokwi (simulação)      |
-| Comunicação            | PySerial                      |
+1. Treinamento do Modelo
+   - Carregar dados históricos reais (Ana HidroWeb) para treinar o modelo de previsão de enchentes
+   - Treinar modelo de previsão do nível máximo do rio do dia seguinte
+   - Salvar modelo treinado
 
----
+2. Programa 1: Coleta de Dados (ESP32)
+   - Medir nível do rio e precipitação
+   - Enviar dados via MQTT para o Programa 2
 
-## 👥 **Equipe**
+3. Programa 2: Recepção e Armazenamento
+   - Receber dados do ESP32 via MQTT
+   - Salvar dados em banco de dados
 
-### Membros (Grupo 46)
+4. Programa 3: Previsão e Alerta (executado diariamente via cronjob)
+   - Carregar dados do banco de dados
+   - Utilizar modelo treinado para prever o nível máximo do rio no dia seguinte
+   - Enviar alerta por e-mail se a previsão exceder X metros
 
--   Amandha Nery (RM560030)
--   Bruno Conterato (RM561048)
--   Gustavo Castro (RM560831)
--   Kild Fernandes (RM560615)
--   Luis Emidio (RM559976)
-
-### Professores
-
--   Tutor: Leonardo Ruiz Orabona
--   Coordenador: André Godoi
+5. Programa 4: Dashboard Interativo - Streamlit (opcional)
 
 ---
 
@@ -118,6 +110,19 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 ---
 
+## ✨ **Próximos Passos e Melhorias Futuras**
+
+O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para concorrer ao pódio, pretendemos explorar:
+
+*   **Modelos de ML Mais Avançados:** Implementação de Redes Neurais Recorrentes (RNNs/LSTMs) para aprimorar a previsão de séries temporais, inspiradas na tese de referência.
+*   **Integração com Banco de Dados:** Armazenamento persistente de dados de sensores e previsões.
+*   **Computação em Nuvem:** Deploy do sistema de monitoramento e ML em plataformas de nuvem para escalabilidade.
+*   **Dashboards Interativos:** Desenvolvimento de uma interface gráfica para visualização em tempo real e configuração de alertas.
+*   **Alerta Multi-canal:** Envio de alertas via SMS ou e-mail para autoridades e população.
+*   **Validação com Dados Reais:** Testes em cenários reais com estações de monitoramento.
+
+---
+
 ## 📂 **Estrutura do Projeto**
 
 ```
@@ -144,16 +149,35 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 ---
 
-## ✨ **Próximos Passos e Melhorias Futuras**
+## 🛠️ **Tecnologias Utilizadas**
 
-O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para concorrer ao pódio, pretendemos explorar:
+| Categoria              | Ferramentas                   |
+| :--------------------- | :---------------------------- |
+| Linguagem              | Python 3.9+                   |
+| Manipulação de Dados   | Pandas, NumPy                 |
+| Visualização           | Matplotlib                    |
+| Aprendizado Profundo   | PyTorch                       |
+| Pré-processamento      | Scikit-learn (StandardScaler) |
+| Ambiente               | Jupyter Notebook, CUDA (GPU)  |
+| IoT/Hardware           | ESP32, Wokwi (simulação)      |
+| Comunicação            | PySerial                      |
 
-*   **Modelos de ML Mais Avançados:** Implementação de Redes Neurais Recorrentes (RNNs/LSTMs) para aprimorar a previsão de séries temporais, inspiradas na tese de referência.
-*   **Integração com Banco de Dados:** Armazenamento persistente de dados de sensores e previsões.
-*   **Computação em Nuvem:** Deploy do sistema de monitoramento e ML em plataformas de nuvem para escalabilidade.
-*   **Dashboards Interativos:** Desenvolvimento de uma interface gráfica para visualização em tempo real e configuração de alertas.
-*   **Alerta Multi-canal:** Envio de alertas via SMS ou e-mail para autoridades e população.
-*   **Validação com Dados Reais:** Testes em cenários reais com estações de monitoramento.
+---
+
+## 👥 **Equipe**
+
+### Membros (Grupo 46)
+
+-   Amandha Nery (RM560030)
+-   Bruno Conterato (RM561048)
+-   Gustavo Castro (RM560831)
+-   Kild Fernandes (RM560615)
+-   Luis Emidio (RM559976)
+
+### Professores
+
+-   Tutor: Leonardo Ruiz Orabona
+-   Coordenador: André Godoi
 
 ---
 **Desenvolvido com paixão e inteligência para um futuro mais seguro.**
