@@ -105,7 +105,7 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     POSTGRES_PORT="5432"
     POSTGRES_USER="user"
     POSTGRES_PASSWORD="password"
-    POSTGRES_DB="mydb"
+    POSTGRES_DB="gsdisaster"
     ```
 
 4.  **Execute o Docker Compose para iniciar o banco de dados:**

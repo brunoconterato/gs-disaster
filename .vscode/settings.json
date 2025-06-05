@@ -4,10 +4,11 @@
             "previewLimit": 50,
             "server": "localhost",
             "port": 5432,
+            "askForPassword": true,
             "driver": "PostgreSQL",
             "name": "gs-disaster",
-            "database": "gs-disaster",
-            "username": "gs"
+            "database": "gsdisaster",
+            "username": "user"
         }
-    ]
+    ],
 }
