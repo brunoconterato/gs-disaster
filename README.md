@@ -87,12 +87,33 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 2.  **Instale as Dependências Python:**
     ```bash
     pip install -r requirements.txt # (Será criado um arquivo requirements.txt com as libs necessárias)
+  ```
+
+3.  **Crie o arquivo .env:**
+    ```bash
+    cp .env.example .env
     ```
-3.  **Execute a Simulação do ESP32 no Wokwi:**
+
+3. **Adicione as variáveis de ambiente:**
+    ```bash
+    POSTGRES_HOST="localhost"
+    POSTGRES_PORT="5432"
+    POSTGRES_USER="user"
+    POSTGRES_PASSWORD="password"
+    POSTGRES_DB="mydb"
+    ```
+
+4.  **Execute o Docker Compose:**
+    ```bash
+    docker-compose up -d
+    ```
+
+5.  **Execute a Simulação do ESP32 no Wokwi:**
     *   Abra o link do projeto ESP32 no Wokwi (o link será fornecido na documentação do PDF).
     *   Inicie a simulação (play button).
     *   Manipule os sliders para simular o nível da água e a precipitação.
-4.  **Execute os Script Python:**
+
+6.  **Execute os Script Python:**
     *  Abra o Jupyter Notebook ou execute os scripts Python diretamente.
 
 ---

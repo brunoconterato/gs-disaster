@@ -6,11 +6,11 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-host=os.getenv("HOST")
-dbname=os.getenv("DATABASE")
-user=os.getenv("USER")
-password=os.getenv("PASSWORD")
-port=os.getenv("PORT")
+host=os.getenv("POSTGRES_HOST")
+dbname=os.getenv("POSTGRES_DB")
+user=os.getenv("POSTGRES_USER")
+password=os.getenv("POSTGRES_PASSWORD")
+port=os.getenv("POSTGRES_PORT")
 
 # Gera a URL de conexão
 DATABASE_URL = f"postgresql://{user}:{password}@{host}:{port}/{dbname}"
