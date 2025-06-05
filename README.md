@@ -71,15 +71,28 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 ## 🏃‍♀️ **Como Rodar o Projeto (MVP)**
 
+### Preparando do Ambiente
+
+- Certifique-se de ter o Python 3.8+ instalado.
+
+### Instalação do Python
+
 1.  **Clone o Repositório:**
     ```bash
-    git clone https://github.com/luisfuturist/gs-disaster.git
+    git clone https://github.com/brunoconterato/gs-disaster.git
     cd gs-disaster
     ```
-2.  **Instale as Dependências Python:**
+
+2. **Ative o ambiente virtual:**
+    ```bash
+    source .venv/bin/activate # linux
+    .venv/Scripts/activate # windows
+    ```
+
+3.  **Instale as Dependências Python:**
     ```bash
     pip install -r requirements.txt # (Será criado um arquivo requirements.txt com as libs necessárias)
-  ```
+    ```
 
 3.  **Crie o arquivo .env:**
     ```bash
@@ -95,18 +108,38 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     POSTGRES_DB="mydb"
     ```
 
-4.  **Execute o Docker Compose:**
+4.  **Execute o Docker Compose para iniciar o banco de dados:**
     ```bash
     docker-compose up -d
     ```
 
-5.  **Execute a Simulação do ESP32 no Wokwi:**
+5.  **Execute o script para inicializar o banco de dados (primeira vez):**
+
+    5.1 Execute o script de inicialização para criar as tabelas:
+        ```bash
+        python db/init_db.py
+        ```
+
+        Isso criará todas as tabelas conforme definidas em `models.py`.
+
+    5.2 **Popule o banco com dados de exemplo**
+        Execute:
+
+        ```bash
+        python db/populate_db.py
+        ```
+
+        Esse script insere um rio, um trecho, tipos de estação e sensor, três estações de monitoramento e nove sensores, conforme os dados reais do Rio Meia Ponte (Goiás).
+
+6.  **Execute a Simulação do ESP32 no Wokwi:**
     *   Abra o link do projeto ESP32 no Wokwi (o link será fornecido na documentação do PDF).
     *   Inicie a simulação (play button).
     *   Manipule os sliders para simular o nível da água e a precipitação.
 
-6.  **Execute os Script Python:**
+7.  **Execute os Script Python:**
     *  Abra o Jupyter Notebook ou execute os scripts Python diretamente.
+
+Para mais detalhes sobre o banco de dados, consulte a [documentação do banco de dados](doc/db/db-instructions.md).
 
 ---
 
@@ -125,7 +158,7 @@ O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para conc
 
 ## 📂 **Estrutura do Projeto**
 
-```
+```txt
 .
 ├── asset                   # Imagens e diagramas do projeto (ex: circuitos, arquitetura)
 │   ├── image_labels.png
@@ -180,4 +213,5 @@ O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para conc
 -   Coordenador: André Godoi
 
 ---
+
 **Desenvolvido com paixão e inteligência para um futuro mais seguro.**
