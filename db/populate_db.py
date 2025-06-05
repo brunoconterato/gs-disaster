@@ -263,23 +263,20 @@ def create_resampled_view(engine):
                 percentile_cont(0.75) WITHIN GROUP (ORDER BY CASE WHEN id_sensor = 8 THEN measurement_value END) AS flow_after_q75
             FROM base
             GROUP BY date
-        ),
-        feat AS (
-            SELECT *,
-                -- Feature engineering: rolling sums (accumulated rain)
-                SUM(rain_upstream_mean) OVER (ORDER BY date ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS rain_upstream_acc_2_days,
-                SUM(rain_downstream_mean) OVER (ORDER BY date ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS rain_downstream_acc_2_days,
-                SUM(rain_after_mean) OVER (ORDER BY date ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS rain_after_acc_2_days,
-                SUM(rain_upstream_mean) OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS rain_upstream_acc_3_days,
-                SUM(rain_downstream_mean) OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS rain_downstream_acc_3_days,
-                SUM(rain_after_mean) OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS rain_after_acc_3_days,
-                -- Date encodings
-                EXTRACT(YEAR FROM date) AS year,
-                SIN(2 * PI() * (EXTRACT(DOY FROM date)-1) / (CASE WHEN EXTRACT(YEAR FROM date) % 4 = 0 THEN 366 ELSE 365 END)) AS date_sin,
-                COS(2 * PI() * (EXTRACT(DOY FROM date)-1) / (CASE WHEN EXTRACT(YEAR FROM date) % 4 = 0 THEN 366 ELSE 365 END)) AS date_cos
-            FROM pivot
         )
-        SELECT * FROM feat
+        SELECT *,
+            -- Feature engineering: rolling sums (accumulated rain)
+            SUM(rain_upstream_mean) OVER (ORDER BY date ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS rain_upstream_acc_2_days,
+            SUM(rain_downstream_mean) OVER (ORDER BY date ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS rain_downstream_acc_2_days,
+            SUM(rain_after_mean) OVER (ORDER BY date ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS rain_after_acc_2_days,
+            SUM(rain_upstream_mean) OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS rain_upstream_acc_3_days,
+            SUM(rain_downstream_mean) OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS rain_downstream_acc_3_days,
+            SUM(rain_after_mean) OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS rain_after_acc_3_days,
+            -- Date encodings
+            EXTRACT(YEAR FROM date) AS year,
+            SIN(2 * PI() * (EXTRACT(DOY FROM date)-1) / (CASE WHEN EXTRACT(YEAR FROM date) % 4 = 0 THEN 366 ELSE 365 END)) AS date_sin,
+            COS(2 * PI() * (EXTRACT(DOY FROM date)-1) / (CASE WHEN EXTRACT(YEAR FROM date) % 4 = 0 THEN 366 ELSE 365 END)) AS date_cos
+        FROM pivot
         ORDER BY date
         """
             )
