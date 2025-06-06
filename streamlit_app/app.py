@@ -2,13 +2,14 @@ import streamlit as st
 from datetime import datetime
 import sys
 import os
+import pandas as pd  # Adicionado para criar a tabela de alertas
 
 # Adiciona o diretório raiz ao sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Importações do projeto
 from db_utils import SessionLocal
-from db.session_files.models import FloodPrediction, Alert
+from db.models import FloodPrediction, Alert
 from sqlalchemy.orm import joinedload
 
 st.set_page_config(page_title="HydroGuard Dashboard", layout="wide")
@@ -34,6 +35,21 @@ with SessionLocal() as session:
     latest = get_latest_prediction(session)
     alerts = get_recent_alerts(session)
 
+    # ✅ Visualização opcional: tabela completa para admin
+    if alerts:
+        df_alerts = pd.DataFrame([{
+            "ID": alert.id_alert,
+            "Data": alert.alert_timestamp.strftime('%d/%m/%Y %H:%M'),
+            "Tipo": alert.alert_type,
+            "Mensagem": alert.message,
+            "Severidade": alert.severity,
+            "Status": alert.status
+        } for alert in alerts])
+
+        with st.expander("🔍 Ver tabela de alertas"):
+            st.dataframe(df_alerts)
+
+    # 📈 Seção da última previsão
     if latest:
         st.subheader("📈 Última Previsão")
         col1, col2 = st.columns(2)
