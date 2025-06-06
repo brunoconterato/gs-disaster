@@ -163,11 +163,13 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 9. **Execute o Listener Saver:**
 
+    // TODO: update link
+
     ```bash
     python listener_save/main.py
     ```
 
-    O **Listener Saver** é um serviço que recebe dados do ESP32 e salva no banco de dados.
+    Esse problema ficará ouvindo os dados do ESP32 e salvando no banco de dados.
 
 10. **Execute o Simple Alert Logger para ouvir os alertas:**
 
@@ -175,16 +177,18 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     python simple_alert_logger/main.py
     ```
 
-    O **Simple Alert Logger** é um serviço demonstrativo que recebe alertas e printa no console.
+    Esse problema ficará ouvindo os alertas e printando no console.
 
 11. **Ative o cronjob para executar o Predictor Notifier (regularmente):**
+
+    Para ativar o preditor e notificador de alertas, adicione o cronjob:
 
     ```bash
     ./predictor_notifier/cron-manager.sh add minutely # a cada 1 minuto (demonstração)
     ./predictor_notifier/cron-manager.sh add daily # diariamente às 00:00
     ```
 
-    Para remover o cronjob, execute:
+    Para esquecer o cronjob, execute:
 
     ```bash
     ./predictor_notifier/cron-manager.sh remove minutely # remove o cronjob de cada minuto (demonstração)
