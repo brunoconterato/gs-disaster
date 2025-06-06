@@ -1,4 +1,4 @@
-# 🌊 Modelo de Dados para HydroGuard: Monitoramento e Alerta de Enchentes
+# **Modelo de Dados para HydroGuard: Monitoramento e Alerta de Enchentes**
 
 Este projeto visa estruturar um banco de dados relacional (PostgreSQL) para suportar o sistema **HydroGuard**. Ele armazenará dados de sensores (reais e simulados), informações geográficas de rios e estações, histórico de medições, metadados de modelos de Machine Learning, previsões de enchentes e registros de alertas emitidos.
 
@@ -6,7 +6,7 @@ Este projeto visa estruturar um banco de dados relacional (PostgreSQL) para supo
 
 # Diagrama Entidade-Relacionamento (DER)
 
-![alt text](mer.png)
+![Diagrama Entidade-Relacionamento (DER)](./mer.png)
 
 ---
 
@@ -134,7 +134,7 @@ Registra todos os alertas emitidos pelo sistema HydroGuard em resposta a uma `fl
 
 ---
 
-## 📐 Explicação das Cardinalidades
+## Explicação das Cardinalidades
 
 As cardinalidades indicam o número mínimo e máximo de ocorrências que uma entidade pode ter em relação a outra.
 
@@ -150,7 +150,7 @@ As cardinalidades indicam o número mínimo e máximo de ocorrências que uma en
 
 ---
 
-## 🔁 Tabela de Cardinalidade Entre Entidades
+## Tabela de Cardinalidade Entre Entidades
 
 | Entidade Fonte        | Entidade Alvo             | Cardinalidade Mínima (Fonte para Alvo) | Cardinalidade Máxima (Fonte para Alvo) |
 |-----------------------|---------------------------|----------------------------------------|----------------------------------------|

@@ -1,0 +1,1 @@
+{"model_type": "GRU", "hidden_size": 58, "num_layers": 1, "learning_rate": 7.154723393206064e-06, "batch_size": 14, "sequence_length": 9}
