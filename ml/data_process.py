@@ -7,6 +7,8 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from db import crud
 from db.database_session import SessionLocal
+from typing import Optional
+from dateutil.relativedelta import relativedelta
 
 
 # --- Load and format data from the database instead of CSV ---
@@ -57,15 +59,24 @@ def get_sensor_ids_by_type(session: Session, station_id: int):
     return result
 
 
-def load_measurements(session: Session, sensor_id: int):
+def load_measurements(
+    session: Session,
+    sensor_id: int,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+):
     """
     Loads all measurements for a given sensor_id as a DataFrame.
+    Optionally filters by start_date and/or end_date (YYYY-MM-DD).
     """
-    measurements = (
-        session.query(crud.models.SensorMeasurement)
-        .filter(crud.models.SensorMeasurement.id_sensor == sensor_id)
-        .all()
+    query = session.query(crud.models.SensorMeasurement).filter(
+        crud.models.SensorMeasurement.id_sensor == sensor_id
     )
+    if start_date:
+        query = query.filter(crud.models.SensorMeasurement.timestamp >= start_date)
+    if end_date:
+        query = query.filter(crud.models.SensorMeasurement.timestamp <= end_date)
+    measurements = query.all()
     records = []
     for m in measurements:
         records.append(
@@ -83,7 +94,9 @@ def load_measurements(session: Session, sensor_id: int):
     return df
 
 
-def load_all_data_from_db():
+def load_data_from_db(
+    start_date: Optional[str] = None, end_date: Optional[str] = None
+):
     session = SessionLocal()
     try:
         station_ids_by_segment = get_station_ids_by_segment(session)
@@ -95,7 +108,7 @@ def load_all_data_from_db():
                     if not sensor_id_list:
                         continue
                     for sensor_id in sensor_id_list:
-                        df = load_measurements(session, sensor_id)
+                        df = load_measurements(session, sensor_id, start_date, end_date)
                         col_name = f"{typ}_{segment_name}__station_{station_id}_sensor_{sensor_id}"
                         dfs[col_name] = df.rename(columns={"value": col_name})
         from functools import reduce
@@ -184,19 +197,21 @@ def resample_data(data: pd.DataFrame, fill_func=None) -> pd.DataFrame:
     Resample the data to daily frequency and aggregate with mean, max, min, q25, q75.
     Optionally applies a fill function after resampling.
     """
-    data_resampled = data.resample("D").agg(
-        [
-            "mean",
-            "max",
-            "min",
-            ("q25", lambda x: x.quantile(0.25)),
-            ("q75", lambda x: x.quantile(0.75)),
-        ]
-    )
+    agg_ops = [
+        ("mean", "mean"),
+        ("max", "max"),
+        ("min", "min"),
+        ("q25", lambda x: x.quantile(0.25)),
+        ("q75", lambda x: x.quantile(0.75)),
+    ]
+    agg_dict = {}
+    for col in data.columns:
+        for name, func in agg_ops:
+            agg_dict[f"{col}_{name}"] = pd.NamedAgg(column=col, aggfunc=func)
+    data_resampled = data.resample("D").agg(**agg_dict)
     data_resampled.reset_index(inplace=True)
     data_resampled.rename(columns={"datetime": "date"}, inplace=True)
     data_resampled.set_index("date", inplace=True)
-    data_resampled.columns = [f"{var}_{stat}" for var, stat in data_resampled.columns]
     if fill_func is not None:
         data_resampled = fill_func(data_resampled)
     return data_resampled
@@ -232,13 +247,26 @@ def feature_engineering(data_resampled, encode_date_func=None):
     return df
 
 
-def process_all_data(save_path=None):
+def process_data(
+    save_path=None, start_date: Optional[str] = None, end_date: Optional[str] = None
+):
     """
     Complete pipeline: load, clean, resample, feature engineer, and optionally save processed data.
     Returns the processed DataFrame.
+    Accepts optional start_date and end_date (YYYY-MM-DD) to filter data loaded from DB.
     """
+    # Adjust date range for DB loading
+    db_start_date = start_date
+    db_end_date = end_date
+    if start_date:
+        dt = datetime.strptime(start_date, "%Y-%m-%d")
+        db_start_date = (dt - relativedelta(months=1)).strftime("%Y-%m-%d")
+    if end_date:
+        dt = datetime.strptime(end_date, "%Y-%m-%d")
+        db_end_date = (dt + relativedelta(months=1)).strftime("%Y-%m-%d")
+
     # Load and format
-    data = load_all_data_from_db()
+    data = load_data_from_db(start_date=db_start_date, end_date=db_end_date)
     data = format_db_data_columns(data)
 
     # Fill missing values
@@ -249,18 +277,24 @@ def process_all_data(save_path=None):
 
     # Feature engineering
     data_resampled = feature_engineering(data_resampled, encode_date_func=encode_date)
-    
+
     # Ensure index is DatetimeIndex for filtering
     if not isinstance(data_resampled.index, pd.DatetimeIndex):
         data_resampled.index = pd.to_datetime(data_resampled.index)
-    
+
     # Filter years
     mask = (data_resampled.index.year <= 2024) & (data_resampled.index.year >= 2014)
     data_filtered = data_resampled[mask]
-    
+
+    # Final filter to requested range
+    if start_date:
+        data_filtered = data_filtered[data_filtered.index >= start_date]
+    if end_date:
+        data_filtered = data_filtered[data_filtered.index <= end_date]
+
     # Save if requested
     if save_path is not None:
         data_filtered.to_csv(save_path, sep=";", index=True)
         print(f"Processed data saved to {save_path}")
-    
+
     return data_filtered
