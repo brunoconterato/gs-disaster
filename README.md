@@ -1,14 +1,19 @@
-# 🌊 HydroGuard: Sistema Inteligente de Monitoramento e Alerta de Enchentes em Rios
+# HydroGuard: Sistema Inteligente de Monitoramento e Alerta de Enchentes em Rios
+
+> Este projeto faz parte do curso de **Inteligência Artificial** da [FIAP](https://github.com/fiap) - Online 2024. Este repositório é a **Global Solution - Protech the Future**.
+
+- **Video Demonstrativo:** [YouTube](https://www.youtube.com/watch?v=dQw4w9WgXcQ) // TODO: add link
+- **PDF do Projeto:** [PDF](./docs/hydroguard.pdf) // TODO: add PDF
 
 ---
 
-## 🎯 **Objetivo do Projeto**
+## **Objetivo do Projeto**
 
 O **HydroGuard** é uma solução digital inovadora desenvolvida para enfrentar o crescente desafio das enchentes em rios, um dos eventos naturais extremos mais impactantes no Brasil e no mundo. Nosso principal objetivo é criar um sistema capaz de **prever, monitorar e mitigar os impactos de enchentes**, fornecendo alertas precoces para comunidades ribeirinhas e autoridades. Utilizando dados reais e as mais recentes tecnologias de Inteligência Artificial e IoT, buscamos transformar a resposta a desastres, tornando-a mais rápida, inteligente e eficaz.
 
 ---
 
-## 💡 **Nossa Escolha: Por Que HydroGuard?**
+## **Nossa Escolha: Por Que HydroGuard?**
 
 A escolha do **HydroGuard** foi baseada em uma análise criteriosa das necessidades do desafio Global Solution 2025.1 e das capacidades da nossa equipe. Optamos por esta proposta pelas seguintes razões fundamentais:
 
@@ -22,7 +27,7 @@ A escolha do **HydroGuard** foi baseada em uma análise criteriosa das necessida
 
 ---
 
-## 🚀 **Escopo do MVP (Produto Mínimo Viável)**
+## **Escopo do MVP (Produto Mínimo Viável)**
 
 Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma Prova de Conceito (PoC) funcional com as seguintes características:
 
@@ -40,103 +45,55 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     *   Utilizará o modelo treinado para prever o nível do rio.
     *   Se o nível previsto ultrapassar um limiar de "enchente iminente", o sistema emitirá um alerta visual (ex: LED no ESP32 simulado) e uma mensagem no console.
 5.  **Documentação e Demonstração:**
-    *   Entrega de um PDF detalhado com a arquitetura, justificativas e códigos.
+    *   Entrega de um PDF detalhado sobre o projeto.
     *   Vídeo de demonstração prática mostrando a interação do ESP32 simulado com o sistema Python e o acionamento do alerta.
 
 ---
 
-## 📊 **Arquitetura do Projeto**
+## **Arquitetura do Projeto**
 
-- Treinamento do Modelo
+- **Treinamento do Modelo**
    - Carregar dados históricos reais (Ana HidroWeb) para treinar o modelo de previsão de enchentes.
    - Treinar modelo de previsão do nível máximo do rio do dia seguinte.
    - Salvar modelo treinado.
 
-- Banco de Dados
+- **Banco de Dados**
    - Armazenar dados dos estações de monitoramento, trechos de rio, tipos de estações, etc.
    - Armazenar dados dos sensores, tipo de sensores, etc.
    - Armazenar dados do modelo treinado e métricas do modelo treinado.
    - Armazenar dados de previsão de enchentes.
    - Armazenar dados dos alertas.
 
-- Programa 1: Coleta de Dados (ESP32)
+- **Programa 1: Coleta de Dados (ESP32)**
    - Medir nível do rio e precipitação.
    - Enviar dados via MQTT para o Programa 2.
 
-- Programa 2: Recepção e Armazenamento
+- **Programa 2: Recepção e Armazenamento**
    - Receber dados do ESP32 via MQTT.
    - Salvar dados em banco de dados.
 
-- Programa 3: Previsão e Alerta (executado diariamente via cronjob)
+- **Programa 3: Previsão e Alerta (executado diariamente via cronjob)**
    - Carregar dados do banco de dados.
    - Utilizar modelo treinado para prever o nível máximo do rio no dia seguinte.
    - Enviar alerta por e-mail se a previsão exceder X metros.
 
-- Programa 4: Dashboard Interativo (opcional)
+- **Programa 4: Webhook para receber alertas (demonstrativo)**
+   - Receber alertas via webhook.
+   - Exibir alertas no console.
+
+- **Programa 5: Dashboard Interativo (opcional)**
 
 ---
 
-## 🧬 **Documentação Técnica: Firmware do ESP32 (Monitoramento Sensorial & Comunicação MQTT)**
+## **Como Rodar o Projeto (MVP)**
 
-- Esta seção detalha o funcionamento interno do firmware embarcado no ESP32, responsável por coletar os dados dos sensores, processá-los e transmiti-los via MQTT no formato JSON.
+### Requisitos:
 
+- Git
+- Python 3+ e pip
+- Docker e Docker Compose
 
-- 🎛️ Componentes de Hardware Simulados
-  - ESP32: Microcontrolador central do sistema.
-  - Sensor Ultrassônico HC-SR04: Mede a distância até a superfície da água, estimando o nível do rio.
-  - Sensor de Umidade DHT22: Mede umidade relativa do ar e temperatura (substituto do sensor de umidade do solo para simulação em Wokwi).
-  - Pluviômetro Simulado (Sensor Analógico): Mede a quantidade de chuva (analogicamente), simulando um pluviômetro simples.
-  - RTC DS1307: Módulo de relógio em tempo real, usado para registrar a marcação temporal dos dados.
-  - Display LCD I2C: Exibe localmente leituras em tempo real.
-
-- 📐 Arquitetura do Firmware
-  - Inicialização (setup)
-  - Inicializa LCD, RTC, sensores conectados.
-  - Conecta à rede Wi-Fi.
-  - Configura as credenciais seguras do MQTT.
-  - Se conecta ao broker MQTT (em modo seguro; para testes, a verificação TLS é desativada).
-  - Faz subscribe no tópico de recebimento para eventual controle remoto.
-
-- 💾 Fluxo Resumido de Dados
-
-[Sensor] ----
-               \
-                >   ESP32    ---->   [Mensagem JSON] ----> [Broker MQTT] ----> [Consumidor Python/Banco/Alerta]
-[RTC | LCD] --
-
-
-- 🔁 Loop Principal (loop)
-  - Mantém a conexão MQTT ativa (client.loop()).
-  - Periodicamente (a cada N segundos definidos em readInterval), realiza:
-  - Leitura dos sensores.
-  - Exibição das leituras no LCD.
-  - Publicação dos dados via MQTT como um objeto JSON.
-
-- 📚. Leitura dos Sensores
-  - get_rain(): Faz leitura analógica do sensor de chuva.
-  - get_distance(): Mede distância via ultrassônico para estimar nível do rio em cm.
-  - dht22.readHumidity(): Lê umidade do ar.
-  - dht22.readTemperature(): Lê temperatura do ar.
-
-- 📦 Formato do JSON Enviado
-  {
-    "station_id": "meiaponte_001",
-    "timestamp": "13:42",
-    "river_level_cm": 85.5,
-    "temperature": 26.4,
-    "soil_moisture_pct": 48.7,
-    "rain_mm": 34.1
-  }
-
----
-
-## 🏃‍♀️ **Como Rodar o Projeto (MVP)**
-
-### Preparando do Ambiente
-
-- Certifique-se de ter o Python 3.8+ instalado.
-
-### Instalação do Python
+### Passo a Passo:
 
 1.  **Clone o Repositório:**
     ```bash
@@ -152,15 +109,15 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 3.  **Instale as Dependências Python:**
     ```bash
-    pip install -r requirements.txt # (Será criado um arquivo requirements.txt com as libs necessárias)
+    pip install -r requirements.txt
     ```
 
-3.  **Crie o arquivo .env:**
+4.  **Crie o arquivo .env:**
     ```bash
     cp .env.example .env
     ```
 
-3. **Adicione as variáveis de ambiente:**
+5. **Adicione as variáveis de ambiente:**
     ```bash
     POSTGRES_HOST="localhost"
     POSTGRES_PORT="5432"
@@ -172,21 +129,21 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     ALERT_LOGGER_WEBHOOK_PORT="8000"
     ```
 
-4.  **Execute o Docker Compose para iniciar o banco de dados:**
+6.  **Execute o Docker Compose para iniciar o banco de dados:**
     ```bash
     docker-compose up -d
     ```
 
-5.  **Execute o script para inicializar o banco de dados (primeira vez):**
+7.  **(Primeira vez) Execute o script para inicializar o banco de dados:**
 
-    5.1 Execute o script de inicialização para criar as tabelas:
+    7.1 Execute o script de inicialização para criar as tabelas:
         ```bash
         python db/scripts/init_db.py
         ```
 
         Isso criará todas as tabelas conforme definidas em `models.py`.
 
-    5.2 **Popule o banco com dados de exemplo**
+    7.2 **Popule o banco com dados de exemplo**
         Execute:
 
         ```bash
@@ -195,24 +152,48 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
         Esse script insere um rio, um trecho, tipos de estação e sensor, três estações de monitoramento e nove sensores, conforme os dados reais do Rio Meia Ponte (Goiás).
 
-6.  **Execute a Simulação do ESP32 no Wokwi:**
-    *   Abra o link do projeto ESP32 no Wokwi (o link será fornecido na documentação do PDF).
+8.  **Execute a Simulação do ESP32 no Wokwi:**
+
+    *   Abra o projeto ESP32 no Wokwi. // TODO: add link
     *   Inicie a simulação (play button).
     *   Manipule os sliders para simular o nível da água e a precipitação.
 
-7. **Execute o Simple Alert Logger para receber alertas:**
+9. **Execute o Listener Saver:**
+
+    ```bash
+    python listener_save/main.py
+    ```
+
+    O **Listener Saver** é um serviço que recebe dados do ESP32 e salva no banco de dados.
+
+9.  **Execute o Simple Alert Logger para ouvir os alertas:**
 
     ```bash
     python simple_alert_logger/main.py
     ```
 
-    O Simple Alert Logger é um serviço demonstrativo que recebe alertas e printa no console.
+    O **Simple Alert Logger** é um serviço demonstrativo que recebe alertas e printa no console.
 
-Para mais detalhes sobre o banco de dados, consulte a [documentação do banco de dados](doc/db/db-instructions.md).
+10. **Ative o cronjob para executar o Predictor Notifier (diariamente):**
+
+    ```bash
+    crontab -e
+    ```
+
+    O Predictor Notifier é um serviço que lê os dados do banco de dados, faz a previsão e envia alertas se necessário.
 
 ---
 
-## ✨ **Próximos Passos e Melhorias Futuras**
+## **Documentação**
+
+- [Hardware: Collector Sender](doc/collector_sender.md)
+- [Software: Listener Saver](doc/listener_saver.md)
+- [Software: Predictor Notifier](doc/predictor_notifier.md) // TODO: create file
+- [Software: Simple Alert Logger](doc/simple_alert_logger.md)
+- [Banco de Dados](doc/db/db_instructions.md)
+  - [Modelo de Dados](doc/db/db_entity_relationships.md)
+
+## **Próximos Passos e Melhorias Futuras**
 
 O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para concorrer ao pódio, pretendemos explorar:
 
@@ -224,48 +205,7 @@ O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para conc
 
 ---
 
-## 📂 **Estrutura do Projeto**
-
-```txt
-.
-├── Platformio
-│   ├── chips
-│   │   ├── rain-sensor.chip.c          # Codigo para simular o sensor de chuva
-│   │   └── rain-sensor.chip.json       # Json do diagrama do sensor de chuva
-│   ├── diagram.json
-│   ├── include
-│   │   └── README
-│   ├── platformio.ini
-│   ├── src
-│   │   ├── main.cpp                    
-│   │   ├── main.h                      
-│   │   └── wokwi-api.h
-│   ├── test
-│   │   └── README
-│   └── wokwi.toml
-├── asset                   # Imagens e diagramas do projeto (ex: circuitos, arquitetura)
-│   ├── image_labels.png
-│   └── image_raw.png
-├── data                    # Dados brutos e pré-processados
-│   ├── ANA HIDROWEB
-│   │   └── RIO MEIA PONTE  # Dados CSV de estações ANA
-│   │       ├── 60640000-MONTANTE DE GOIANIA.csv
-│   │       ├── 60650000-JUSANTE DE GOIANIA.csv
-│   │       └── 60655001-UHE SAO SIMAO FAZENDA BONITA DE BAIXO.
-├── doc                     # Documentação do projeto (relatórios, etc.)
-│   └── tmp
-│       └── Fontes.md
-├── README.md               # Este arquivo
-└── ref                     # Materiais de referência e pesquisa
-    └── LaleskaAparecidaFerreiraMesquita # Dissertação de Mestrado
-        ├── LaleskaAparecidaFerreiraMesquita_ME_revisada.md
-        ├── LaleskaAparecidaFerreiraMesquita_ME_revisada.pdf
-        └── ref.md
-```
-
----
-
-## 🛠️ **Tecnologias Utilizadas**
+## **Tecnologias Utilizadas**
 
 | Categoria              | Ferramentas                   |
 | :--------------------- | :---------------------------- |
@@ -283,7 +223,7 @@ O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para conc
 
 ---
 
-## 👥 **Equipe**
+## **Equipe**
 
 ### Membros (Grupo 46)
 

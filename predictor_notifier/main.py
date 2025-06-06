@@ -28,7 +28,7 @@ def main():
 
     # TODO: save alert to db
     
-    create_fake_alert(db)
+    # create_fake_alert(db)
     
     # TODO: send alert if prediction is greater than threshold
 
