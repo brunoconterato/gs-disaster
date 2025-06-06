@@ -245,15 +245,11 @@ def feature_engineering(data_resampled, encode_date_func=None):
     return df
 
 
-def load_and_process_data_from_db(
-    save_path=None, start_date: Optional[str] = None, end_date: Optional[str] = None
-):
+def adjust_date_range(start_date: Optional[str], end_date: Optional[str]) -> tuple:
     """
-    Complete pipeline: load, clean, resample, feature engineer, and optionally save processed data.
-    Returns the processed DataFrame.
-    Accepts optional start_date and end_date (YYYY-MM-DD) to filter data loaded from DB.
+    Adjusts the date range by extending it by one month backward for the start date
+    and one month forward for the end date.
     """
-    # Adjust date range for DB loading
     db_start_date = start_date
     db_end_date = end_date
     if start_date:
@@ -262,6 +258,19 @@ def load_and_process_data_from_db(
     if end_date:
         dt = datetime.strptime(end_date, "%Y-%m-%d")
         db_end_date = (dt + relativedelta(months=1)).strftime("%Y-%m-%d")
+    return db_start_date, db_end_date
+
+
+def load_and_process_data_from_db(
+    save_path=None, start_date: Optional[str] = None, end_date: Optional[str] = None
+) -> pd.DataFrame:
+    """
+    Complete pipeline: load, clean, resample, feature engineer, and optionally save processed data.
+    Returns the processed DataFrame.
+    Accepts optional start_date and end_date (YYYY-MM-DD) to filter data loaded from DB.
+    """
+    # Adjust date range for DB loading
+    db_start_date, db_end_date = adjust_date_range(start_date, end_date)
 
     # Load and format
     data = load_data_from_db(start_date=db_start_date, end_date=db_end_date)
