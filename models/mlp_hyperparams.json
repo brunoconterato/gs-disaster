@@ -1,0 +1,1 @@
+{"model_type": "MLP", "hidden_layers": [128, 64, 32], "learning_rate": 3.409258846166908e-05, "batch_size": 15, "sequence_length": 7}

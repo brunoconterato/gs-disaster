@@ -1,4 +1,7 @@
 from sqlalchemy.orm import Session
+# import models
+from sqlalchemy import Table, select
+from database_session import Base
 from db import models
 
 # ------------------- River -------------------
@@ -475,10 +478,17 @@ def delete_alert(db: Session, alert_id: int):
 
 
 # ------------------- ResampledMeasurementsDaily View -------------------
-def get_resampled_measurements_daily(db: Session, start_date=None, end_date=None, limit=1000):
-    query = db.query(models.ResampledMeasurementsDaily)
+def get_resampled_measurements_daily(db, start_date=None, end_date=None, limit=1000):
+    # Reflect the view as a Table for read-only queries
+    ResampledMeasurementsDaily = Table(
+        "resampled_measurements_daily", Base.metadata, autoload_with=db.bind
+    )
+    query = select(ResampledMeasurementsDaily)
     if start_date:
-        query = query.filter(models.ResampledMeasurementsDaily.date >= start_date)
+        query = query.where(ResampledMeasurementsDaily.c.date >= start_date)
     if end_date:
-        query = query.filter(models.ResampledMeasurementsDaily.date <= end_date)
-    return query.order_by(models.ResampledMeasurementsDaily.date).limit(limit).all()
+        query = query.where(ResampledMeasurementsDaily.c.date <= end_date)
+    query = query.order_by(ResampledMeasurementsDaily.c.date)
+    if limit:
+        query = query.limit(limit)
+    return db.execute(query).fetchall()
