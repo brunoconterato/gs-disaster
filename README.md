@@ -81,10 +81,11 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
    - Receber alertas via webhook.
    - Exibir alertas no console.
 
-- **Programa 5 - Interactive Dashboard**: Dashboard Streamlit (opcional)
-   - Visualizar dados em tempo real.
-   - Configurar alertas.
-   - Ver histórico de alertas.
+- **Programa 5 - Interactive Dashboard**: Dashboard Streamlit
+   - Visualização da última previsão registrada (nível do rio e risco previsto).
+   - Exibição dos últimos alertas gerados, com data, severidade e mensagem.
+   - Tabela interativa com histórico completo de alertas, acessível via painel expansível.
+   - Desenvolvido com Streamlit para visualização em tempo real dos dados salvos no banco.
 
 ---
 
@@ -194,7 +195,30 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     ./predictor_notifier/cron-manager.sh remove minutely # remove o cronjob de cada minuto (demonstração)
     ./predictor_notifier/cron-manager.sh remove daily # remove o cronjob de diariamente às 00:00
     ```
+12. **Execute o Dashboard Interativo com Streamlit:**
 
+    Com o banco populado e os alertas sendo gerados, execute:
+
+    ```bash
+    streamlit run streamlit_app/app.py
+    ```
+
+    Isso abrirá o dashboard no navegador em:
+
+    ```
+    http://localhost:8501
+    ```
+
+    O painel exibirá:
+    - A última previsão de enchente registrada
+    - Os alertas gerados (recentes e histórico)
+    - Tabela interativa em `st.expander` com todos os dados dos alertas
+
+    Para testar a funcionalidade, você pode disparar um alerta simulado com:
+
+    ```bash
+    python predictor_notifier/main.py
+    ```
 ---
 
 ## **Documentação**
