@@ -153,6 +153,10 @@ def fill(df: pd.DataFrame) -> pd.DataFrame:
     rain_cols = [col for col in df.columns if "rain" in col]
     df[rain_cols] = df[rain_cols].fillna(0)
     flow_level_cols = [col for col in df.columns if ("flow" in col or "level" in col)]
+    # Backward fill for flow and level columns, then ensure values are > 0 and not null
+    df[flow_level_cols] = df[flow_level_cols].bfill()
+    for col in flow_level_cols:
+        df[col] = df[col].where(df[col] > 0, np.nan)
     df[flow_level_cols] = df[flow_level_cols].bfill()
     return df
 
@@ -228,7 +232,7 @@ def feature_engineering(data_resampled, encode_date_func=None):
     return df
 
 
-def process_all_data(encode_date_func=None, fill_func=None, save_path=None):
+def process_all_data(save_path=None):
     """
     Complete pipeline: load, clean, resample, feature engineer, and optionally save processed data.
     Returns the processed DataFrame.
@@ -236,23 +240,27 @@ def process_all_data(encode_date_func=None, fill_func=None, save_path=None):
     # Load and format
     data = load_all_data_from_db()
     data = format_db_data_columns(data)
-    print_missing_values(data)
+
     # Fill missing values
     data = fill(data)
-    print_missing_values(data.loc["2024"])
+
     # Resample
     data_resampled = resample_data(data, fill_func=fill)
-    print_missing_values(data_resampled)
+
     # Feature engineering
     data_resampled = feature_engineering(data_resampled, encode_date_func=encode_date)
+    
     # Ensure index is DatetimeIndex for filtering
     if not isinstance(data_resampled.index, pd.DatetimeIndex):
         data_resampled.index = pd.to_datetime(data_resampled.index)
+    
     # Filter years
     mask = (data_resampled.index.year <= 2024) & (data_resampled.index.year >= 2014)
     data_filtered = data_resampled[mask]
+    
     # Save if requested
     if save_path is not None:
         data_filtered.to_csv(save_path, sep=";", index=True)
         print(f"Processed data saved to {save_path}")
+    
     return data_filtered
