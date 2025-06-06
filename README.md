@@ -1,14 +1,19 @@
-# 🌊 HydroGuard: Sistema Inteligente de Monitoramento e Alerta de Enchentes em Rios
+# HydroGuard: Sistema Inteligente de Monitoramento e Alerta de Enchentes em Rios
+
+> Este projeto faz parte do curso de **Inteligência Artificial** da [FIAP](https://github.com/fiap) - Online 2024. Este repositório é a **Global Solution - Protech the Future**.
+
+- **Video Demonstrativo:** [YouTube](https://www.youtube.com/watch?v=dQw4w9WgXcQ) // TODO: add link
+- **PDF do Projeto:** [PDF](./docs/hydroguard.pdf) // TODO: add PDF
 
 ---
 
-## 🎯 **Objetivo do Projeto**
+## **Objetivo do Projeto**
 
 O **HydroGuard** é uma solução digital inovadora desenvolvida para enfrentar o crescente desafio das enchentes em rios, um dos eventos naturais extremos mais impactantes no Brasil e no mundo. Nosso principal objetivo é criar um sistema capaz de **prever, monitorar e mitigar os impactos de enchentes**, fornecendo alertas precoces para comunidades ribeirinhas e autoridades. Utilizando dados reais e as mais recentes tecnologias de Inteligência Artificial e IoT, buscamos transformar a resposta a desastres, tornando-a mais rápida, inteligente e eficaz.
 
 ---
 
-## 💡 **Nossa Escolha: Por Que HydroGuard?**
+## **Nossa Escolha: Por Que HydroGuard?**
 
 A escolha do **HydroGuard** foi baseada em uma análise criteriosa das necessidades do desafio Global Solution 2025.1 e das capacidades da nossa equipe. Optamos por esta proposta pelas seguintes razões fundamentais:
 
@@ -22,7 +27,7 @@ A escolha do **HydroGuard** foi baseada em uma análise criteriosa das necessida
 
 ---
 
-## 🚀 **Escopo do MVP (Produto Mínimo Viável)**
+## **Escopo do MVP (Produto Mínimo Viável)**
 
 Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma Prova de Conceito (PoC) funcional com as seguintes características:
 
@@ -40,51 +45,61 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     *   Utilizará o modelo treinado para prever o nível do rio.
     *   Se o nível previsto ultrapassar um limiar de "enchente iminente", o sistema emitirá um alerta visual (ex: LED no ESP32 simulado) e uma mensagem no console.
 5.  **Documentação e Demonstração:**
-    *   Entrega de um PDF detalhado com a arquitetura, justificativas e códigos.
+    *   Entrega de um PDF detalhado sobre o projeto.
     *   Vídeo de demonstração prática mostrando a interação do ESP32 simulado com o sistema Python e o acionamento do alerta.
 
 ---
 
-## 📊 **Arquitetura do Projeto**
+## **Arquitetura do Projeto**
 
-- Treinamento do Modelo
+- **Machine Learning**
    - Carregar dados históricos reais (Ana HidroWeb) para treinar o modelo de previsão de enchentes.
    - Treinar modelo de previsão do nível máximo do rio do dia seguinte.
    - Salvar modelo treinado.
 
-- Banco de Dados
+- **Banco de Dados**
    - Armazenar dados dos estações de monitoramento, trechos de rio, tipos de estações, etc.
    - Armazenar dados dos sensores, tipo de sensores, etc.
    - Armazenar dados do modelo treinado e métricas do modelo treinado.
    - Armazenar dados de previsão de enchentes.
    - Armazenar dados dos alertas.
 
-- Programa 1: Coleta de Dados (ESP32)
+- **Programa 1 - Collector Sender**: Coleta de Dados (ESP32) e Envio via MQTT
    - Medir nível do rio e precipitação.
    - Enviar dados via MQTT para o Programa 2.
 
-- Programa 2: Recepção e Armazenamento
+- **Programa 2 - Listener Saver**: Recepção via MQTT e Armazenamento de dados no PostgreSQL
    - Receber dados do ESP32 via MQTT.
    - Salvar dados em banco de dados.
 
-- Programa 3: Previsão e Alerta (executado diariamente via cronjob)
+- **Programa 3 - Predictor Notifier**: Previsão e Alerta (executado regularmente)
    - Carregar dados do banco de dados.
    - Utilizar modelo treinado para prever o nível máximo do rio no dia seguinte.
    - Enviar alerta por e-mail se a previsão exceder X metros.
 
-- Programa 4: Dashboard Interativo (opcional)
+- **Programa 4 - Simple Alert Logger**: Recebimento de alertas via webhook e Exibição no console (demonstrativo)
+   - Receber alertas via webhook.
+   - Exibir alertas no console.
+
+- **Programa 5 - Interactive Dashboard**: Dashboard Streamlit
+   - Visualização da última previsão registrada (nível do rio e risco previsto).
+   - Exibição dos últimos alertas gerados, com data, severidade e mensagem.
+   - Tabela interativa com histórico completo de alertas, acessível via painel expansível.
+   - Desenvolvido com Streamlit para visualização em tempo real dos dados salvos no banco.
 
 ---
 
-## 🏃‍♀️ **Como Rodar o Projeto (MVP)**
+## **Como Rodar o Projeto (MVP)**
 
-### Preparando do Ambiente
+### Requisitos:
 
-- Certifique-se de ter o Python 3.8+ instalado.
+- Git
+- Python 3+ e pip
+- Docker e Docker Compose
 
-### Instalação do Python
+### Passo a Passo:
 
-1.  **Clone o Repositório:**
+1. **Clone o Repositório:**
     ```bash
     git clone https://github.com/brunoconterato/gs-disaster.git
     cd gs-disaster
@@ -96,40 +111,43 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     .venv/Scripts/activate # windows
     ```
 
-3.  **Instale as Dependências Python:**
+3. **Instale as Dependências Python:**
     ```bash
-    pip install -r requirements.txt # (Será criado um arquivo requirements.txt com as libs necessárias)
+    pip install -r requirements.txt
     ```
 
-3.  **Crie o arquivo .env:**
+4. **Crie o arquivo .env:**
     ```bash
     cp .env.example .env
     ```
 
-3. **Adicione as variáveis de ambiente:**
+5. **Adicione as variáveis de ambiente:**
     ```bash
     POSTGRES_HOST="localhost"
     POSTGRES_PORT="5432"
     POSTGRES_USER="user"
     POSTGRES_PASSWORD="password"
     POSTGRES_DB="hydroguard"
+
+    ALERT_LOGGER_WEBHOOK_HOST="0.0.0.0"
+    ALERT_LOGGER_WEBHOOK_PORT="8000"
     ```
 
-4.  **Execute o Docker Compose para iniciar o banco de dados:**
+6. **Execute o Docker Compose para iniciar o banco de dados:**
     ```bash
     docker-compose up -d
     ```
 
-5.  **Execute o script para inicializar o banco de dados (primeira vez):**
+7. **(Primeira vez) Execute o script para inicializar o banco de dados:**
 
-    5.1 Execute o script de inicialização para criar as tabelas:
+    7.1 Execute o script de inicialização para criar as tabelas:
         ```bash
         python db/scripts/init_db.py
         ```
 
         Isso criará todas as tabelas conforme definidas em `models.py`.
 
-    5.2 **Popule o banco com dados de exemplo**
+    7.2 **Popule o banco com dados de exemplo**
         Execute:
 
         ```bash
@@ -138,58 +156,93 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
         Esse script insere um rio, um trecho, tipos de estação e sensor, três estações de monitoramento e nove sensores, conforme os dados reais do Rio Meia Ponte (Goiás).
 
-6.  **Execute a Simulação do ESP32 no Wokwi:**
-    *   Abra o link do projeto ESP32 no Wokwi (o link será fornecido na documentação do PDF).
-    *   Inicie a simulação (play button).
-    *   Manipule os sliders para simular o nível da água e a precipitação.
+8. **Execute a Simulação do ESP32 no Wokwi:**
 
-7.  **Execute os Script Python:**
-    *  Abra o Jupyter Notebook ou execute os scripts Python diretamente.
+    - Abra o projeto ESP32 no Wokwi. // TODO: add link
+    - Inicie a simulação (play button).
+    - Manipule os sliders para simular o nível da água e a precipitação.
 
-Para mais detalhes sobre o banco de dados, consulte a [documentação do banco de dados](doc/db/db-instructions.md).
+9. **Execute o Listener Saver:**
 
+    // TODO: update link
+
+    ```bash
+    python listener_save/main.py
+    ```
+
+    Esse problema ficará ouvindo os dados do ESP32 e salvando no banco de dados.
+
+10. **Execute o Simple Alert Logger para ouvir os alertas:**
+
+    ```bash
+    python simple_alert_logger/main.py
+    ```
+
+    Esse problema ficará ouvindo os alertas e printando no console.
+
+11. **Ative o cronjob para executar o Predictor Notifier (regularmente):**
+
+    Para ativar o preditor e notificador de alertas, adicione o cronjob:
+
+    ```bash
+    ./predictor_notifier/cron-manager.sh add minutely # a cada 1 minuto (demonstração)
+    ./predictor_notifier/cron-manager.sh add daily # diariamente às 00:00
+    ```
+
+    Para esquecer o cronjob, execute:
+
+    ```bash
+    ./predictor_notifier/cron-manager.sh remove minutely # remove o cronjob de cada minuto (demonstração)
+    ./predictor_notifier/cron-manager.sh remove daily # remove o cronjob de diariamente às 00:00
+    ```
+12. **Execute o Dashboard Interativo com Streamlit:**
+
+    Com o banco populado e os alertas sendo gerados, execute:
+
+    ```bash
+    streamlit run streamlit_app/app.py
+    ```
+
+    Isso abrirá o dashboard no navegador em:
+
+    ```
+    http://localhost:8501
+    ```
+
+    O painel exibirá:
+    - A última previsão de enchente registrada
+    - Os alertas gerados (recentes e histórico)
+    - Tabela interativa em `st.expander` com todos os dados dos alertas
+
+    Para testar a funcionalidade, você pode disparar um alerta simulado com:
+
+    ```bash
+    python predictor_notifier/main.py
+    ```
 ---
 
-## ✨ **Próximos Passos e Melhorias Futuras**
+## **Documentação**
 
-O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para concorrer ao pódio, pretendemos explorar:
+- [Hardware: Collector Sender](doc/collector_sender.md)
+- [Software: Listener Saver](doc/listener_saver.md)
+- [Software: Predictor Notifier](doc/predictor_notifier.md) // TODO: create file
+- [Software: Simple Alert Logger](doc/simple_alert_logger.md)
+- [Banco de Dados](doc/db/db_instructions.md)
+  - [Modelo de Dados](doc/db/db_entity_relationships.md)
+
+## **Próximos Passos e Melhorias Futuras**
+
+O MVP do HydroGuard é um ponto de partida. Para futuras iterações, pretendemos explorar:
 
 *   **Modelos de ML Mais Avançados:** Implementação de Redes Neurais Recorrentes (RNNs/LSTMs) para aprimorar a previsão de séries temporais, inspiradas na tese de referência.
-*   **Integração com Banco de Dados:** Armazenamento persistente de dados de sensores e previsões.
 *   **Computação em Nuvem:** Deploy do sistema de monitoramento e ML em plataformas de nuvem para escalabilidade.
-*   **Dashboards Interativos:** Desenvolvimento de uma interface gráfica para visualização em tempo real e configuração de alertas.
-*   **Alerta Multi-canal:** Envio de alertas via SMS ou e-mail para autoridades e população.
+*   **Alerta Multi-canal:** Criação de um webhook para receber alertas e enviar via SMS ou e-mail para autoridades e população.
 *   **Validação com Dados Reais:** Testes em cenários reais com estações de monitoramento.
+*   **Dashboards Interativos:** Desenvolvimento de uma interface gráfica para visualização em tempo real e configuração de alertas.
 
 ---
 
-## 📂 **Estrutura do Projeto**
-
-```txt
-.
-├── asset                   # Imagens e diagramas do projeto (ex: circuitos, arquitetura)
-│   ├── image_labels.png
-│   └── image_raw.png
-├── data                    # Dados brutos e pré-processados
-│   ├── ANA HIDROWEB
-│   │   └── RIO MEIA PONTE  # Dados CSV de estações ANA
-│   │       ├── 60640000-MONTANTE DE GOIANIA.csv
-│   │       ├── 60650000-JUSANTE DE GOIANIA.csv
-│   │       └── 60655001-UHE SAO SIMAO FAZENDA BONITA DE BAIXO.
-├── doc                     # Documentação do projeto (relatórios, etc.)
-│   └── tmp
-│       └── Fontes.md
-├── README.md               # Este arquivo
-└── ref                     # Materiais de referência e pesquisa
-    └── LaleskaAparecidaFerreiraMesquita # Dissertação de Mestrado
-        ├── LaleskaAparecidaFerreiraMesquita_ME_revisada.md
-        ├── LaleskaAparecidaFerreiraMesquita_ME_revisada.pdf
-        └── ref.md
-```
-
----
-
-## 🛠️ **Tecnologias Utilizadas**
+## **Tecnologias Utilizadas**
 
 | Categoria              | Ferramentas                   |
 | :--------------------- | :---------------------------- |
@@ -203,10 +256,11 @@ O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para conc
 | Comunicação            | PySerial                      |
 | Banco de Dados         | PostgreSQL                    |
 | Containerização        | Docker, Docker Compose        |
+| Webhook                | FastAPI, Uvicorn              |
 
 ---
 
-## 👥 **Equipe**
+## **Equipe**
 
 ### Membros (Grupo 46)
 

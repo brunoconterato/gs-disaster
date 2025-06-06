@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import Table, select
-from database_session import Base
+from db.database_session import Base
 from db import models
 
 
