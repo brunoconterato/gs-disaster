@@ -52,7 +52,7 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 ## **Arquitetura do Projeto**
 
-- **Treinamento do Modelo**
+- **Machine Learning**
    - Carregar dados históricos reais (Ana HidroWeb) para treinar o modelo de previsão de enchentes.
    - Treinar modelo de previsão do nível máximo do rio do dia seguinte.
    - Salvar modelo treinado.
@@ -64,24 +64,27 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
    - Armazenar dados de previsão de enchentes.
    - Armazenar dados dos alertas.
 
-- **Programa 1: Coleta de Dados (ESP32)**
+- **Programa 1 - Collector Sender**: Coleta de Dados (ESP32) e Envio via MQTT
    - Medir nível do rio e precipitação.
    - Enviar dados via MQTT para o Programa 2.
 
-- **Programa 2: Recepção e Armazenamento**
+- **Programa 2 - Listener Saver**: Recepção via MQTT e Armazenamento de dados no PostgreSQL
    - Receber dados do ESP32 via MQTT.
    - Salvar dados em banco de dados.
 
-- **Programa 3: Previsão e Alerta (executado diariamente via cronjob)**
+- **Programa 3 - Predictor Notifier**: Previsão e Alerta (executado regularmente)
    - Carregar dados do banco de dados.
    - Utilizar modelo treinado para prever o nível máximo do rio no dia seguinte.
    - Enviar alerta por e-mail se a previsão exceder X metros.
 
-- **Programa 4: Webhook para receber alertas (demonstrativo)**
+- **Programa 4 - Simple Alert Logger**: Recebimento de alertas via webhook e Exibição no console (demonstrativo)
    - Receber alertas via webhook.
    - Exibir alertas no console.
 
-- **Programa 5: Dashboard Interativo (opcional)**
+- **Programa 5 - Interactive Dashboard**: Dashboard Streamlit (opcional)
+   - Visualizar dados em tempo real.
+   - Configurar alertas.
+   - Ver histórico de alertas.
 
 ---
 
@@ -95,7 +98,7 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 ### Passo a Passo:
 
-1.  **Clone o Repositório:**
+1. **Clone o Repositório:**
     ```bash
     git clone https://github.com/brunoconterato/gs-disaster.git
     cd gs-disaster
@@ -107,12 +110,12 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     .venv/Scripts/activate # windows
     ```
 
-3.  **Instale as Dependências Python:**
+3. **Instale as Dependências Python:**
     ```bash
     pip install -r requirements.txt
     ```
 
-4.  **Crie o arquivo .env:**
+4. **Crie o arquivo .env:**
     ```bash
     cp .env.example .env
     ```
@@ -129,12 +132,12 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     ALERT_LOGGER_WEBHOOK_PORT="8000"
     ```
 
-6.  **Execute o Docker Compose para iniciar o banco de dados:**
+6. **Execute o Docker Compose para iniciar o banco de dados:**
     ```bash
     docker-compose up -d
     ```
 
-7.  **(Primeira vez) Execute o script para inicializar o banco de dados:**
+7. **(Primeira vez) Execute o script para inicializar o banco de dados:**
 
     7.1 Execute o script de inicialização para criar as tabelas:
         ```bash
@@ -152,11 +155,11 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
         Esse script insere um rio, um trecho, tipos de estação e sensor, três estações de monitoramento e nove sensores, conforme os dados reais do Rio Meia Ponte (Goiás).
 
-8.  **Execute a Simulação do ESP32 no Wokwi:**
+8. **Execute a Simulação do ESP32 no Wokwi:**
 
-    *   Abra o projeto ESP32 no Wokwi. // TODO: add link
-    *   Inicie a simulação (play button).
-    *   Manipule os sliders para simular o nível da água e a precipitação.
+    - Abra o projeto ESP32 no Wokwi. // TODO: add link
+    - Inicie a simulação (play button).
+    - Manipule os sliders para simular o nível da água e a precipitação.
 
 9. **Execute o Listener Saver:**
 
@@ -166,7 +169,7 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
     O **Listener Saver** é um serviço que recebe dados do ESP32 e salva no banco de dados.
 
-9.  **Execute o Simple Alert Logger para ouvir os alertas:**
+10. **Execute o Simple Alert Logger para ouvir os alertas:**
 
     ```bash
     python simple_alert_logger/main.py
@@ -174,13 +177,19 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
     O **Simple Alert Logger** é um serviço demonstrativo que recebe alertas e printa no console.
 
-10. **Ative o cronjob para executar o Predictor Notifier (diariamente):**
+11. **Ative o cronjob para executar o Predictor Notifier (regularmente):**
 
     ```bash
-    crontab -e
+    ./predictor_notifier/cron-manager.sh add minutely # a cada 1 minuto (demonstração)
+    ./predictor_notifier/cron-manager.sh add daily # diariamente às 00:00
     ```
 
-    O Predictor Notifier é um serviço que lê os dados do banco de dados, faz a previsão e envia alertas se necessário.
+    Para remover o cronjob, execute:
+
+    ```bash
+    ./predictor_notifier/cron-manager.sh remove minutely # remove o cronjob de cada minuto (demonstração)
+    ./predictor_notifier/cron-manager.sh remove daily # remove o cronjob de diariamente às 00:00
+    ```
 
 ---
 
@@ -195,7 +204,7 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 ## **Próximos Passos e Melhorias Futuras**
 
-O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para concorrer ao pódio, pretendemos explorar:
+O MVP do HydroGuard é um ponto de partida. Para futuras iterações, pretendemos explorar:
 
 *   **Modelos de ML Mais Avançados:** Implementação de Redes Neurais Recorrentes (RNNs/LSTMs) para aprimorar a previsão de séries temporais, inspiradas na tese de referência.
 *   **Computação em Nuvem:** Deploy do sistema de monitoramento e ML em plataformas de nuvem para escalabilidade.
