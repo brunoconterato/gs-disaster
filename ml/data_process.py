@@ -94,9 +94,7 @@ def load_measurements(
     return df
 
 
-def load_data_from_db(
-    start_date: Optional[str] = None, end_date: Optional[str] = None
-):
+def load_data_from_db(start_date: Optional[str] = None, end_date: Optional[str] = None):
     session = SessionLocal()
     try:
         station_ids_by_segment = get_station_ids_by_segment(session)
@@ -247,7 +245,7 @@ def feature_engineering(data_resampled, encode_date_func=None):
     return df
 
 
-def process_data(
+def load_and_process_data_from_db(
     save_path=None, start_date: Optional[str] = None, end_date: Optional[str] = None
 ):
     """
