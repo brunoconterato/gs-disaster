@@ -167,6 +167,9 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     POSTGRES_USER="user"
     POSTGRES_PASSWORD="password"
     POSTGRES_DB="hydroguard"
+
+    ALERT_LOGGER_WEBHOOK_HOST="0.0.0.0"
+    ALERT_LOGGER_WEBHOOK_PORT="8000"
     ```
 
 4.  **Execute o Docker Compose para iniciar o banco de dados:**
@@ -197,8 +200,13 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     *   Inicie a simulação (play button).
     *   Manipule os sliders para simular o nível da água e a precipitação.
 
-7.  **Execute os Script Python:**
-    *  Abra o Jupyter Notebook ou execute os scripts Python diretamente.
+7. **Execute o Simple Alert Logger para receber alertas:**
+
+    ```bash
+    python simple_alert_logger/main.py
+    ```
+
+    O Simple Alert Logger é um serviço demonstrativo que recebe alertas e printa no console.
 
 Para mais detalhes sobre o banco de dados, consulte a [documentação do banco de dados](doc/db/db-instructions.md).
 
@@ -209,11 +217,10 @@ Para mais detalhes sobre o banco de dados, consulte a [documentação do banco d
 O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para concorrer ao pódio, pretendemos explorar:
 
 *   **Modelos de ML Mais Avançados:** Implementação de Redes Neurais Recorrentes (RNNs/LSTMs) para aprimorar a previsão de séries temporais, inspiradas na tese de referência.
-*   **Integração com Banco de Dados:** Armazenamento persistente de dados de sensores e previsões.
 *   **Computação em Nuvem:** Deploy do sistema de monitoramento e ML em plataformas de nuvem para escalabilidade.
-*   **Dashboards Interativos:** Desenvolvimento de uma interface gráfica para visualização em tempo real e configuração de alertas.
-*   **Alerta Multi-canal:** Envio de alertas via SMS ou e-mail para autoridades e população.
+*   **Alerta Multi-canal:** Criação de um webhook para receber alertas e enviar via SMS ou e-mail para autoridades e população.
 *   **Validação com Dados Reais:** Testes em cenários reais com estações de monitoramento.
+*   **Dashboards Interativos:** Desenvolvimento de uma interface gráfica para visualização em tempo real e configuração de alertas.
 
 ---
 
@@ -272,6 +279,7 @@ O MVP do HydroGuard é um ponto de partida. Para futuras iterações e para conc
 | Comunicação            | PySerial                      |
 | Banco de Dados         | PostgreSQL                    |
 | Containerização        | Docker, Docker Compose        |
+| Webhook                | FastAPI, Uvicorn              |
 
 ---
 
