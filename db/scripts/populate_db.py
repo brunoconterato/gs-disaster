@@ -2,7 +2,9 @@ import sys
 import os
 
 # Add the project root directory to the Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from crud import *
@@ -103,7 +105,12 @@ def save_raw_measurements(df, station, engine):
     # Prepare the data in the right format
     print("[INFO] Saving raw measurements to the database for ", station)
     rows = []
-    for _, row in tqdm(df.iterrows(), total=len(df), desc=f"Saving {station} measurements", colour="cyan"):
+    for _, row in tqdm(
+        df.iterrows(),
+        total=len(df),
+        desc=f"Saving {station} measurements",
+        colour="cyan",
+    ):
         try:
             timestamp = pd.to_datetime(f"{row['Data']} {row['Hora']}", dayfirst=True)
         except Exception:
@@ -291,171 +298,171 @@ def create_resampled_view(engine):
                 filled AS (
                     SELECT
                         date,
-                        rain_upstream_mean,
-                        rain_upstream_max,
-                        rain_upstream_min,
-                        rain_upstream_q25,
-                        rain_upstream_q75,
+                        COALESCE(rain_upstream_mean, 0) AS rain_upstream_mean,
+                        COALESCE(rain_upstream_max, 0) AS rain_upstream_max,
+                        COALESCE(rain_upstream_min, 0) AS rain_upstream_min,
+                        COALESCE(rain_upstream_q25, 0) AS rain_upstream_q25,
+                        COALESCE(rain_upstream_q75, 0) AS rain_upstream_q75,
                         -- Level upstream: fill nulls with forward then backward fill
                         COALESCE(
-                            LAST_VALUE(level_upstream_mean IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_upstream_mean IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_upstream_mean) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_upstream_mean) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_upstream_mean,
                         COALESCE(
-                            LAST_VALUE(level_upstream_max IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_upstream_max IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_upstream_max) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_upstream_max) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_upstream_max,
                         COALESCE(
-                            LAST_VALUE(level_upstream_min IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_upstream_min IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_upstream_min) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_upstream_min) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_upstream_min,
                         COALESCE(
-                            LAST_VALUE(level_upstream_q25 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_upstream_q25 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_upstream_q25) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_upstream_q25) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_upstream_q25,
                         COALESCE(
-                            LAST_VALUE(level_upstream_q75 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_upstream_q75 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_upstream_q75) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_upstream_q75) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_upstream_q75,
                         -- Flow upstream: fill nulls with forward then backward fill
                         COALESCE(
-                            LAST_VALUE(flow_upstream_mean IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_upstream_mean IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_upstream_mean) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_upstream_mean) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_upstream_mean,
                         COALESCE(
-                            LAST_VALUE(flow_upstream_max IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_upstream_max IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_upstream_max) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_upstream_max) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_upstream_max,
                         COALESCE(
-                            LAST_VALUE(flow_upstream_min IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_upstream_min IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_upstream_min) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_upstream_min) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_upstream_min,
                         COALESCE(
-                            LAST_VALUE(flow_upstream_q25 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_upstream_q25 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_upstream_q25) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_upstream_q25) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_upstream_q25,
                         COALESCE(
-                            LAST_VALUE(flow_upstream_q75 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_upstream_q75 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_upstream_q75) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_upstream_q75) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_upstream_q75,
-                        rain_downstream_mean,
-                        rain_downstream_max,
-                        rain_downstream_min,
-                        rain_downstream_q25,
-                        rain_downstream_q75,
+                        COALESCE(rain_downstream_mean, 0) AS rain_downstream_mean,
+                        COALESCE(rain_downstream_max, 0) AS rain_downstream_max,
+                        COALESCE(rain_downstream_min, 0) AS rain_downstream_min,
+                        COALESCE(rain_downstream_q25, 0) AS rain_downstream_q25,
+                        COALESCE(rain_downstream_q75, 0) AS rain_downstream_q75,
                         COALESCE(
-                            LAST_VALUE(level_downstream_mean IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_downstream_mean IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_downstream_mean) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_downstream_mean) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_downstream_mean,
                         COALESCE(
-                            LAST_VALUE(level_downstream_max IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_downstream_max IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_downstream_max) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_downstream_max) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_downstream_max,
                         COALESCE(
-                            LAST_VALUE(level_downstream_min IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_downstream_min IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_downstream_min) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_downstream_min) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_downstream_min,
                         COALESCE(
-                            LAST_VALUE(level_downstream_q25 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_downstream_q25 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_downstream_q25) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_downstream_q25) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_downstream_q25,
                         COALESCE(
-                            LAST_VALUE(level_downstream_q75 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_downstream_q75 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_downstream_q75) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_downstream_q75) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_downstream_q75,
                         COALESCE(
-                            LAST_VALUE(flow_downstream_mean IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_downstream_mean IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_downstream_mean) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_downstream_mean) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_downstream_mean,
                         COALESCE(
-                            LAST_VALUE(flow_downstream_max IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_downstream_max IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_downstream_max) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_downstream_max) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_downstream_max,
                         COALESCE(
-                            LAST_VALUE(flow_downstream_min IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_downstream_min IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_downstream_min) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_downstream_min) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_downstream_min,
                         COALESCE(
-                            LAST_VALUE(flow_downstream_q25 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_downstream_q25 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_downstream_q25) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_downstream_q25) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_downstream_q25,
                         COALESCE(
-                            LAST_VALUE(flow_downstream_q75 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_downstream_q75 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_downstream_q75) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_downstream_q75) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_downstream_q75,
-                        rain_after_mean,
-                        rain_after_max,
-                        rain_after_min,
-                        rain_after_q25,
-                        rain_after_q75,
+                        COALESCE(rain_after_mean, 0) AS rain_after_mean,
+                        COALESCE(rain_after_max, 0) AS rain_after_max,
+                        COALESCE(rain_after_min, 0) AS rain_after_min,
+                        COALESCE(rain_after_q25, 0) AS rain_after_q25,
+                        COALESCE(rain_after_q75, 0) AS rain_after_q75,
                         COALESCE(
-                            LAST_VALUE(level_after_mean IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_after_mean IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_after_mean) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_after_mean) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_after_mean,
                         COALESCE(
-                            LAST_VALUE(level_after_max IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_after_max IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_after_max) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_after_max) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_after_max,
                         COALESCE(
-                            LAST_VALUE(level_after_min IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_after_min IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_after_min) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_after_min) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_after_min,
                         COALESCE(
-                            LAST_VALUE(level_after_q25 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_after_q25 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_after_q25) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_after_q25) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_after_q25,
                         COALESCE(
-                            LAST_VALUE(level_after_q75 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(level_after_q75 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_after_q75) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(level_after_q75) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS level_after_q75,
                         COALESCE(
-                            LAST_VALUE(flow_after_mean IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_after_mean IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_after_mean) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_after_mean) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_after_mean,
                         COALESCE(
-                            LAST_VALUE(flow_after_max IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_after_max IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_after_max) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_after_max) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_after_max,
                         COALESCE(
-                            LAST_VALUE(flow_after_min IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_after_min IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_after_min) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_after_min) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_after_min,
                         COALESCE(
-                            LAST_VALUE(flow_after_q25 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_after_q25 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_after_q25) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_after_q25) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_after_q25,
                         COALESCE(
-                            LAST_VALUE(flow_after_q75 IGNORE NULLS) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
-                            FIRST_VALUE(flow_after_q75 IGNORE NULLS) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_after_q75) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+                            MAX(flow_after_q75) OVER (ORDER BY date DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
                             0
                         ) AS flow_after_q75
                     FROM pivot
