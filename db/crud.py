@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
-# import models
 from sqlalchemy import Table, select
 from db.database_session import Base
 from db import models
+
 
 # ------------------- River -------------------
 def create_river(db: Session, river_name: str, description: str = None):
@@ -475,20 +475,3 @@ def delete_alert(db: Session, alert_id: int):
     db.delete(alert)
     db.commit()
     return alert
-
-
-# ------------------- ResampledMeasurementsDaily View -------------------
-def get_resampled_measurements_daily(db, start_date=None, end_date=None, limit=1000):
-    # Reflect the view as a Table for read-only queries
-    ResampledMeasurementsDaily = Table(
-        "resampled_measurements_daily", Base.metadata, autoload_with=db.bind
-    )
-    query = select(ResampledMeasurementsDaily)
-    if start_date:
-        query = query.where(ResampledMeasurementsDaily.c.date >= start_date)
-    if end_date:
-        query = query.where(ResampledMeasurementsDaily.c.date <= end_date)
-    query = query.order_by(ResampledMeasurementsDaily.c.date)
-    if limit:
-        query = query.limit(limit)
-    return db.execute(query).fetchall()

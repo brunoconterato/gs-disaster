@@ -4,11 +4,10 @@ import torch
 import pandas as pd
 from typing import Any, Dict
 from torch.utils.data import Dataset
-from db.database_session import SessionLocal
-from db.crud import get_resampled_measurements_daily
-from ml.models import MLP, LSTM, GRU  # Import models from models.py
+from ml.models import MLP, LSTM, GRU
 from sklearn.preprocessing import StandardScaler
 import joblib
+from ml.data_process import load_and_process_data_from_db
 
 MODELS_PATH = os.path.join(os.path.dirname(__file__), "../models")
 
@@ -121,38 +120,27 @@ def prepare_timeseries_data(
 
 
 def get_data_from_db(
-    db_session=None,
     start_date=None,
     end_date=None,
-    limit=1000,
     sequence_length=5,
     target_col="level_downstream_max",
     drop_flow=True,
     scaler=None,
 ):
     """
-    Fetches data from the resampled_measurements_daily view using db.crud.get_resampled_measurements_daily,
+    Fetches data from the database using load_and_process_data_from_db,
     preprocesses it (removes flow columns, normalizes, etc.), and returns a TimeSeriesDataset ready for inference.
     """
-    if db_session is None:
-        db_session = SessionLocal()
-        close_session = True
-    else:
-        close_session = False
-    try:
-        rows = get_resampled_measurements_daily(db_session, start_date, end_date, limit)
-        df = pd.DataFrame(rows, columns=rows[0].keys() if rows else [])
-        dataset, scaler, df = prepare_timeseries_data(
-            df,
-            sequence_length=sequence_length,
-            target_col=target_col,
-            drop_flow=drop_flow,
-            scaler=scaler,
-        )
-        return dataset, scaler, df
-    finally:
-        if close_session:
-            db_session.close()
+    # Ignore db_session and limit, as load_and_process_data_from_db manages its own session and loads all data in range
+    df = load_and_process_data_from_db(start_date=start_date, end_date=end_date)
+    dataset, scaler, df = prepare_timeseries_data(
+        df,
+        sequence_length=sequence_length,
+        target_col=target_col,
+        drop_flow=drop_flow,
+        scaler=scaler,
+    )
+    return dataset, scaler, df
 
 
 def predict(
@@ -166,10 +154,12 @@ def predict(
     Uses the correct window size (sequence_length) from hyperparams.
     Returns a list of predictions (aligned with data index, None for first N rows).
     """
+    from typing import Optional
+
     sequence_length = hyperparams.get("sequence_length", 5)
     # Exclude the target column from inputs
     input_cols = [col for col in data.columns if col != target_col]
-    preds = [None] * len(data)
+    preds: list[Optional[float]] = [None] * len(data)
     model.eval()
     with torch.no_grad():
         for i in range(len(data) - sequence_length):
