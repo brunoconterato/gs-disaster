@@ -2,8 +2,8 @@
 
 > Este projeto faz parte do curso de **Inteligência Artificial** da [FIAP](https://github.com/fiap) - Online 2024. Este repositório é a **Global Solution - Protech the Future**.
 
-- **Video Demonstrativo:** [YouTube](https://www.youtube.com/watch?v=dQw4w9WgXcQ) // TODO: add link
-- **PDF do Projeto:** [PDF](./docs/hydroguard.pdf) // TODO: add PDF
+- **Video Demonstrativo:** [YouTube](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
+- **PDF do Projeto:** [PDF](./doc/hydroguard.pdf)
 
 ---
 
