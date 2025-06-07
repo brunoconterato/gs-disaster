@@ -2,6 +2,7 @@ import sys
 import os
 from datetime import datetime, timedelta
 import json
+from turtle import st
 
 # Add the root directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -41,12 +42,11 @@ def main():
 
     # TODO: get data from db
     # You can adjust these dates as needed or make them dynamic
-    end_date = datetime.today().strftime("%Y-%m-%d")
-    start_date = (datetime.today() - timedelta(days=sequence_length)).strftime(
-        "%Y-%m-%d"
-    )
+    start_date = "2023-10-01"
+    end_date = "2023-10-10"
     example_data = load_and_process_data_from_db(
-        start_date=start_date, end_date=end_date
+        start_date=start_date,
+        end_date=end_date,
     )
     print(f"Loaded example data from DB: {example_data.shape}")
 
@@ -81,7 +81,7 @@ def main():
     # TODO: save prediction to db
 
     # TODO: save alert to db if prediction is greater than threshold
-    
+
     # TODO: notify alert if prediction is greater than threshold
 
     db.close()
