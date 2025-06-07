@@ -1,9 +1,9 @@
 {
-  "hidden_size": 36,
+  "hidden_size": 32,
   "num_layers": 1,
-  "learning_rate": 4.308729726945443e-05,
-  "epochs": 50,
-  "batch_size": 15,
+  "learning_rate": 6.256170744947498e-07,
+  "epochs": 2000,
+  "batch_size": 29,
   "model_type": "LSTM",
   "input_size": 39
 }
