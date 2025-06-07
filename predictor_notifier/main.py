@@ -15,7 +15,7 @@ def main():
     conn = get_db_connection()
     print("Successfully connected to the database!")
 
-    # Create a database session
+    # Cria sessão com o banco
     db = SessionLocal()
 
     # TODO: load model
@@ -26,12 +26,10 @@ def main():
 
     # TODO: save prediction to db
 
-    # TODO: save alert to db
-    
-    # create_fake_alert(db)
-    
-    # TODO: send alert if prediction is greater than threshold
+    # ✅ Etapa atual: salvar alerta falso no banco
+    create_fake_alert(db)
 
+    # ✅ Enviar alerta via webhook (manual por enquanto)
     notify_alert(
         alert_id="1",
         alert_timestamp=datetime.now(),
@@ -41,7 +39,9 @@ def main():
         status="Active"
     )
     
-    # Close the session
+    # TODO: send alert if prediction is greater than threshold
+
+    # Encerra sessão com o banco
     db.close()
     release_db_connection(conn)
 
