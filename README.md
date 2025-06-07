@@ -251,7 +251,6 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 - [Hardware: Collector Sender](doc/collector_sender.md)
 - [Software: Listener Saver](doc/listener_saver.md)
-- [Software: Simple Alert Logger](doc/simple_alert_logger.md)
 - [Banco de Dados](doc/db/db_instructions.md)
   - [Modelo de Dados](doc/db/db_entity_relationships.md)
 
