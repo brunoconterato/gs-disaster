@@ -26,7 +26,6 @@ def main():
     conn = get_db_connection()
     print("Successfully connected to the database!")
 
-    # Cria sessão com o banco
     db = SessionLocal()
 
     # Load hyperparameters
@@ -81,28 +80,10 @@ def main():
 
     # TODO: save prediction to db
 
-    # ✅ Etapa atual: salvar alerta falso no banco
-    create_fake_alert(db)
+    # TODO: save alert to db if prediction is greater than threshold
+    
+    # TODO: notify alert if prediction is greater than threshold
 
-    # TODO: save alert to db
-
-    # create_fake_alert(db)
-
-    # TODO: send alert if prediction is greater than threshold
-
-    # ✅ Enviar alerta via webhook (manual por enquanto)
-    notify_alert(
-        alert_id="1",
-        alert_timestamp=datetime.now(),
-        alert_type="Flood Warning",
-        message="High risk of flooding detected in the next day",
-        severity="High",
-        status="Active",
-    )
-
-    # TODO: send alert if prediction is greater than threshold
-
-    # Encerra sessão com o banco
     db.close()
     release_db_connection(conn)
 

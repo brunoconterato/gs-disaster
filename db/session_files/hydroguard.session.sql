@@ -31,7 +31,7 @@ SELECT * FROM sensor_type;
 SELECT * FROM sensor;
 
 -- @block
-SELECT * FROM sensor_measurement;
+SELECT * FROM sensor_measurement LIMIT 10;
 
 -- @block
 SELECT * FROM ml_model;

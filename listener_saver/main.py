@@ -1,14 +1,24 @@
+import sys
+import os
+
+# Add the root directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import paho.mqtt.client as mqtt
 import json
 import time
 from db.database_session import get_db
 from db.crud import create_sensor_measurement  
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # MQTT Credentials
-MQTT_BROKER = "759d2f782c6f48d68eafab33492641f8.s1.eu.hivemq.cloud"
-MQTT_PORT = 8883
-MQTT_USER = "sla"
-MQTT_PASSWORD = "sla"
+MQTT_BROKER = os.getenv("MQTT_BROKER")
+MQTT_PORT = os.getenv("MQTT_PORT")
+MQTT_USER = os.getenv("MQTT_USER")
+MQTT_PASSWORD = os.getenv("MQTT_PASSWORD")
 
 # Sensor mapeamento
 SENSOR_MAPPING = {
@@ -58,7 +68,7 @@ client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
 client.tls_set()  # Enable TLS
 client.on_connect = on_connect
 client.on_message = on_message
-client.connect(MQTT_BROKER, MQTT_PORT, 60)
+client.connect(MQTT_BROKER, int(MQTT_PORT), 60)
 
 print("Starting MQTT listener...")
 client.loop_start()
