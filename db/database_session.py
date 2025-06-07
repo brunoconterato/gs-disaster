@@ -13,7 +13,7 @@ load_dotenv()
 # Database connection configuration
 DB_CONFIG = {
     'host': os.getenv('POSTGRES_HOST'),
-    'port': os.getenv('POSTGRES_PORT'),
+    'port': int(os.getenv('POSTGRES_PORT')),
     'database': os.getenv('POSTGRES_DB'),
     'user': os.getenv('POSTGRES_USER'),
     'password': os.getenv('POSTGRES_PASSWORD')
@@ -37,8 +37,6 @@ def get_db_connection():
 
 def release_db_connection(conn):
     connection_pool.putconn(conn)
-
-# TODO: remove this
 
 @contextmanager
 def get_db():
