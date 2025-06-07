@@ -13,7 +13,6 @@ from database_session import get_db, engine
 from datetime import datetime
 import pandas as pd
 from tqdm import tqdm
-from sqlalchemy import text
 import io
 
 # 1. River
@@ -221,6 +220,24 @@ def load_and_save_raw_measurements(db):
 def main():
     print("[START] Populating database...")
     with get_db() as db:
+        # Model
+        print("[INFO] Creating model...")
+        model = create_ml_model(db,
+            model_name="LSTM",
+            model_type="LSTM",
+            training_date=datetime.now(),
+            performance_metrics=None,
+            model_path="models/lstm.pt",
+            input_features_description=None,
+            output_target_description=None,
+            is_active=True
+            )
+        db.flush()
+        model_id = getattr(model, "id_model", None)
+        if not isinstance(model_id, int):
+            model_id = model.__dict__["id_model"]
+        print(f"[OK] Model created with id: {model_id}")
+
         # River
         print("[INFO] Creating river...")
         river = create_river(db, **river_data)

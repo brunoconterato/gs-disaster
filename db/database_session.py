@@ -38,8 +38,6 @@ def get_db_connection():
 def release_db_connection(conn):
     connection_pool.putconn(conn)
 
-# TODO: remove this
-
 @contextmanager
 def get_db():
     db = SessionLocal()

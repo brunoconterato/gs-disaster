@@ -15,19 +15,23 @@ def main():
     conn = get_db_connection()
     print("Successfully connected to the database!")
 
+    # Cria sessão com o banco
     db = SessionLocal()
 
-    # TODO: load model
-    
-    # TODO: get data from db
-    
-    # TODO: predict
+    print("[INFO] Creating a fake alert...")
+    create_fake_alert(db)
 
-    # TODO: save prediction to db
-
-    # TODO: save alert to db if prediction is greater than threshold
+    print("[INFO] Notifying the fake alert...")
+    notify_alert(
+        alert_id="1",
+        alert_timestamp=datetime.now(),
+        alert_type="Flood Warning",
+        message="High risk of flooding detected in the next day",
+        severity="High",
+        status="Active"
+    )
     
-    # TODO: notify alert if prediction is greater than threshold
+    print("[INFO] Alert sent successfully!")
 
     db.close()
     release_db_connection(conn)

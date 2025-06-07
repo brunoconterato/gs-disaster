@@ -150,6 +150,11 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
     ALERT_LOGGER_WEBHOOK_HOST="0.0.0.0"
     ALERT_LOGGER_WEBHOOK_PORT="8000"
+
+    MQTT_BROKER="your-mqtt-broker.com"
+    MQTT_PORT="8883"
+    MQTT_USER="your-mqtt-user"
+    MQTT_PASSWORD="your-mqtt-password"
     ```
 
 7.  **Execute o Docker Compose para iniciar o banco de dados:**
@@ -178,16 +183,14 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 9.  **Execute a Simulação do ESP32 no Wokwi:**
 
-    - Abra o projeto ESP32 no Wokwi: [Wokwi ESP32 Simulation](https://wokwi.com/projects/432700067859996673)
+    - Abra o projeto ESP32 no Wokwi: [Wokwi Project](https://wokwi.com/projects/432700067859996673)
     - Inicie a simulação (play button).
     - Manipule os sliders para simular o nível da água e a precipitação.
 
 10. **Execute o Listener Saver:**
 
-    // TODO: update link
-
     ```bash
-    python listener_saver/sensors_ingestion.py
+    python listener_saver/main.py
     ```
 
     Esse programa ficará ouvindo os dados do ESP32 e salvando no banco de dados.
@@ -216,12 +219,12 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     ./predictor_notifier/cron-manager.sh remove daily # remove o cronjob de diariamente às 00:00
     ```
 
-13. **Execute o Dashboard Interativo com Streamlit:**
+12. **Abra o Dashboard Interativo:**
 
     Com o banco populado e os alertas sendo gerados, execute:
 
     ```bash
-    streamlit run streamlit_app/app.py
+    streamlit run dashboard/app.py
     ```
 
     Isso abrirá o dashboard no navegador em:
@@ -239,7 +242,7 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     Para testar a funcionalidade, você pode disparar um alerta simulado com:
 
     ```bash
-    python predictor_notifier/main.py
+    python predictor_notifier/simulate_alert.py
     ```
 
 ---
@@ -248,7 +251,6 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
 - [Hardware: Collector Sender](doc/collector_sender.md)
 - [Software: Listener Saver](doc/listener_saver.md)
-- [Software: Predictor Notifier](doc/predictor_notifier.md) // TODO: create file
 - [Software: Simple Alert Logger](doc/simple_alert_logger.md)
 - [Banco de Dados](doc/db/db_instructions.md)
   - [Modelo de Dados](doc/db/db_entity_relationships.md)
