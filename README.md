@@ -111,17 +111,24 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     .venv/Scripts/activate # windows
     ```
 
-3. **Instale as Dependências Python:**
+3. **Instale o PyTorch e o Pytorch Lightning:**
+    ```bash
+    python -m pip install lightning
+    ```
+
+    **Nota:** O Pytorch Lightning já instala o Pytorch. Qualquer problema, reinstale o PyTorch manualmente conforme as instruções do site oficial: [PyTorch](https://pytorch.org/get-started/locally/).
+
+4. **Instale as Dependências Python:**
     ```bash
     pip install -r requirements.txt
     ```
 
-4. **Crie o arquivo .env:**
+5. **Crie o arquivo .env:**
     ```bash
     cp .env.example .env
     ```
 
-5. **Adicione as variáveis de ambiente:**
+6. **Adicione as variáveis de ambiente:**
     ```bash
     POSTGRES_HOST="localhost"
     POSTGRES_PORT="5432"
@@ -133,21 +140,21 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     ALERT_LOGGER_WEBHOOK_PORT="8000"
     ```
 
-6. **Execute o Docker Compose para iniciar o banco de dados:**
+7. **Execute o Docker Compose para iniciar o banco de dados:**
     ```bash
     docker-compose up -d
     ```
 
-7. **(Primeira vez) Execute o script para inicializar o banco de dados:**
+8. **(Primeira vez) Execute o script para inicializar o banco de dados:**
 
-    7.1 Execute o script de inicialização para criar as tabelas:
+    8.1 Execute o script de inicialização para criar as tabelas:
         ```bash
         python db/scripts/init_db.py
         ```
 
         Isso criará todas as tabelas conforme definidas em `models.py`.
 
-    7.2 **Popule o banco com dados de exemplo**
+    8.2 **Popule o banco com dados de exemplo**
         Execute:
 
         ```bash
@@ -156,13 +163,13 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
         Esse script insere um rio, um trecho, tipos de estação e sensor, três estações de monitoramento e nove sensores, conforme os dados reais do Rio Meia Ponte (Goiás).
 
-8. **Execute a Simulação do ESP32 no Wokwi:**
+9. **Execute a Simulação do ESP32 no Wokwi:**
 
     - Abra o projeto ESP32 no Wokwi. // TODO: add link
     - Inicie a simulação (play button).
     - Manipule os sliders para simular o nível da água e a precipitação.
 
-9. **Execute o Listener Saver:**
+10. **Execute o Listener Saver:**
 
     // TODO: update link
 
@@ -172,7 +179,7 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
     Esse problema ficará ouvindo os dados do ESP32 e salvando no banco de dados.
 
-10. **Execute o Simple Alert Logger para ouvir os alertas:**
+11. **Execute o Simple Alert Logger para ouvir os alertas:**
 
     ```bash
     python simple_alert_logger/main.py
@@ -180,7 +187,7 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
 
     Esse problema ficará ouvindo os alertas e printando no console.
 
-11. **Ative o cronjob para executar o Predictor Notifier (regularmente):**
+12. **Ative o cronjob para executar o Predictor Notifier (regularmente):**
 
     Para ativar o preditor e notificador de alertas, adicione o cronjob:
 
@@ -195,7 +202,7 @@ Para esta fase da Global Solution, o **HydroGuard** será apresentado como uma P
     ./predictor_notifier/cron-manager.sh remove minutely # remove o cronjob de cada minuto (demonstração)
     ./predictor_notifier/cron-manager.sh remove daily # remove o cronjob de diariamente às 00:00
     ```
-12. **Execute o Dashboard Interativo com Streamlit:**
+13. **Execute o Dashboard Interativo com Streamlit:**
 
     Com o banco populado e os alertas sendo gerados, execute:
 
