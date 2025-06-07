@@ -47,3 +47,8 @@ SELECT * FROM resampled_measurements_daily;
 
 -- @block
 SELECT * FROM alert;
+
+-- @block Clean alerts and predictions
+
+DELETE FROM alert;
+DELETE FROM flood_prediction;
